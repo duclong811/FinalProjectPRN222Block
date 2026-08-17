@@ -1,0 +1,42 @@
+@model FruitShop.Web.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<section class="py-5">
+    <div class="container" style="max-width: 900px;">
+        <h1 class="display-6 font-serif mb-2">Thanh Toán</h1>
+        <p class="text-muted mb-4">Không cần đăng nhập. Phương thức thanh toán là tiền mặt khi nhận hàng.</p>
+
+        <form asp-action="Checkout" method="post" class="row g-4">
+            <div class="col-md-7">
+                <div class="bg-white border p-4">
+                    <h2 class="h4 font-serif mb-3">Thông Tin Nhận Hàng</h2>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3"><label asp-for="CustomerName" class="form-label">Họ và tên</label><input asp-for="CustomerName" class="form-control"><span asp-validation-for="CustomerName" class="text-danger small"></span></div>
+                    <div class="mb-3"><label asp-for="CustomerPhone" class="form-label">Số điện thoại</label><input asp-for="CustomerPhone" class="form-control"><span asp-validation-for="CustomerPhone" class="text-danger small"></span></div>
+                    <div class="mb-3"><label asp-for="CustomerEmail" class="form-label">Email nhận xác nhận đơn hàng</label><input asp-for="CustomerEmail" class="form-control"><span asp-validation-for="CustomerEmail" class="text-danger small"></span></div>
+                    <div class="mb-3"><label asp-for="ShippingAddress" class="form-label">Địa chỉ giao hàng</label><textarea asp-for="ShippingAddress" class="form-control" rows="3"></textarea><span asp-validation-for="ShippingAddress" class="text-danger small"></span></div>
+                    <div class="mb-3"><label asp-for="Note" class="form-label">Ghi chú (không bắt buộc)</label><textarea asp-for="Note" class="form-control" rows="2"></textarea></div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="bg-white border p-4">
+                    <h2 class="h4 font-serif border-bottom pb-3">Đơn Hàng</h2>
+                    @foreach (var item in Model.Cart.Items)
+                    {
+                        <div class="d-flex justify-content-between small py-2"><span>@item.Name (lô @item.BatchCode) × @item.Quantity</span><span>@item.LineTotal.ToString("N0") ₫</span></div>
+                    }
+                    <div class="d-flex justify-content-between border-top pt-3 mt-2"><strong>Tổng cộng</strong><strong>@Model.Cart.TotalAmount.ToString("N0") ₫</strong></div>
+                    <div class="small text-muted mt-3">Thanh toán: Tiền mặt khi nhận hàng (COD)</div>
+                    <button type="submit" class="btn btn-luxury w-100 mt-4">ĐẶT HÀNG COD</button>
+                    <a asp-action="Index" class="btn btn-outline-luxury w-100 mt-2">QUAY LẠI GIỎ HÀNG</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,51 @@
+<Window x:Class="FruitShop.Client.ProductDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Product details" Height="560" Width="650" WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize" Background="#F5F7F4">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="150" /></Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock x:Name="ProductNameTextBlock" FontSize="28" FontWeight="SemiBold" Foreground="#1D2A20" TextWrapping="Wrap" />
+                <TextBlock x:Name="CategoryTextBlock" Margin="0,7,0,0" Foreground="#39704A" FontWeight="SemiBold" />
+            </StackPanel>
+            <Border x:Name="ImageBorder" Grid.Column="1" Background="White" CornerRadius="8" Margin="14,0,0,0" Padding="6">
+                <Image x:Name="ProductImage" Stretch="Uniform" />
+            </Border>
+        </Grid>
+        <Grid Grid.Row="1" Margin="0,28,0,22">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Padding="16" Margin="0,0,8,0" Background="White" CornerRadius="8">
+                <StackPanel><TextBlock Text="Price" Foreground="#68736B" /><TextBlock x:Name="PriceTextBlock" Margin="0,5,0,0" FontSize="20" FontWeight="SemiBold" Foreground="#1D2A20" /></StackPanel>
+            </Border>
+            <Border Grid.Column="1" Padding="16" Margin="8,0,0,0" Background="White" CornerRadius="8">
+                <StackPanel><TextBlock Text="Available stock" Foreground="#68736B" /><TextBlock x:Name="StockTextBlock" Margin="0,5,0,0" FontSize="20" FontWeight="SemiBold" Foreground="#1D2A20" /></StackPanel>
+            </Border>
+        </Grid>
+        <Border Grid.Row="2" Padding="18" Background="White" CornerRadius="8">
+            <StackPanel>
+                <TextBlock Text="Description" FontWeight="SemiBold" Foreground="#1D2A20" />
+                <TextBlock x:Name="DescriptionTextBlock" Margin="0,8,0,18" TextWrapping="Wrap" Foreground="#4F5751" LineHeight="22" />
+                <TextBlock Text="Product information" FontWeight="SemiBold" Foreground="#1D2A20" />
+                <TextBlock x:Name="MetadataTextBlock" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="#4F5751" LineHeight="22" />
+            </StackPanel>
+        </Border>
+        <Grid Grid.Row="3" Margin="0,22,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button Content="Edit product" Width="120" Height="38" Click="EditButton_Click" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" />
+                <Button Content="Hide from sale" Width="125" Height="38" Margin="10,0,0,0" Click="HideProductButton_Click" Background="#B42318" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" />
+            </StackPanel>
+            <Button Content="Close" Width="110" Height="38" HorizontalAlignment="Right" Click="CloseButton_Click" Background="#275D38" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" />
+        </Grid>
+    </Grid>
+</Window>

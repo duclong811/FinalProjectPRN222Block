@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="container mt-5" style="max-width: 450px;">
+    <div class="card shadow-sm border-0 rounded-lg">
+        <div class="card-body p-4">
+            <h3 class="text-center font-weight-bold mb-4" style="color: #275D38;">Đăng Nhập Khách Hàng</h3>
+            
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+
+            <form asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <div class="form-group mb-3">
+                    <label class="form-label font-weight-bold">Tên đăng nhập / Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Nhập tên đăng nhập" required autofocus />
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label font-weight-bold">Mật khẩu</label>
+                    <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu" required />
+                </div>
+                <button type="submit" class="btn btn-success btn-block w-100 py-2" style="background-color: #275D38; border: none;">Đăng Nhập</button>
+            </form>
+            <div class="text-center mt-3">
+                <span>Chưa có tài khoản? </span>
+                <a asp-action="Register" style="color: #275D38; font-weight: bold;">Đăng ký ngay</a>
+            </div>
+        </div>
+    </div>
+</div>

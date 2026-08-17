@@ -1,0 +1,38 @@
+<Window x:Class="FruitShop.Client.AddProductWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add product" Height="690" Width="650" WindowStartupLocation="CenterOwner"
+        Background="#F5F7F4" ResizeMode="NoResize">
+    <Grid Margin="28">
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="Add product" FontSize="28" FontWeight="SemiBold" Foreground="#1D2A20" />
+            <TextBlock Text="The selected image will be stored in FruitShop.Web/wwwroot/images/products." Margin="0,7,0,0" Foreground="#66706A" TextWrapping="Wrap" />
+        </StackPanel>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,22,0,0">
+            <StackPanel>
+                <TextBlock Text="Product name" FontWeight="SemiBold" /><TextBox x:Name="NameTextBox" Margin="0,6,0,14" Height="38" Padding="10,7" />
+                <TextBlock Text="Category" FontWeight="SemiBold" /><ComboBox x:Name="CategoryComboBox" DisplayMemberPath="Name" Margin="0,6,0,14" Height="38" Padding="8" />
+                <Grid Margin="0,0,0,14"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,7,0"><TextBlock Text="Price" FontWeight="SemiBold" /><TextBox x:Name="PriceTextBox" Margin="0,6,0,0" Height="38" Padding="10,7" /></StackPanel>
+                    <StackPanel Grid.Column="1" Margin="7,0,0,0"><TextBlock Text="Initial stock" FontWeight="SemiBold" /><TextBlock Text="Create inventory batches after saving the product." Margin="0,9,0,0" TextWrapping="Wrap" Foreground="#66706A" /></StackPanel>
+                </Grid>
+                <Grid Margin="0,0,0,14"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,7,0"><TextBlock Text="Unit" FontWeight="SemiBold" /><TextBox x:Name="UnitTextBox" Margin="0,6,0,0" Height="38" Padding="10,7" Text="kg" /></StackPanel>
+                    <StackPanel Grid.Column="1" Margin="7,0,0,0"><TextBlock Text="Expiry" FontWeight="SemiBold" /><TextBlock Text="Expiry dates are managed per inventory batch." Margin="0,9,0,0" TextWrapping="Wrap" Foreground="#66706A" /></StackPanel>
+                </Grid>
+                <TextBlock Text="Description" FontWeight="SemiBold" /><TextBox x:Name="DescriptionTextBox" Margin="0,6,0,14" Height="78" Padding="10,7" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                <TextBlock Text="Product image (optional, JPG/JPEG/PNG/WEBP, max 5 MB)" FontWeight="SemiBold" />
+                <Grid Margin="0,6,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="112" /></Grid.ColumnDefinitions>
+                    <TextBox x:Name="ImagePathTextBox" IsReadOnly="True" Height="38" Padding="10,7" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="1" Content="Choose image" Margin="10,0,0,0" Click="ChooseImageButton_Click" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" />
+                </Grid>
+                <TextBlock x:Name="StatusTextBlock" MinHeight="24" TextWrapping="Wrap" Foreground="#B42318" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,10">
+                    <Button Content="Cancel" Width="100" Height="40" Margin="0,0,10,0" Click="CancelButton_Click" Background="Transparent" Foreground="#275D38" BorderBrush="#275D38" Cursor="Hand" />
+                    <Button x:Name="SaveButton" Content="Create product" Width="130" Height="40" Click="SaveButton_Click" Background="#275D38" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

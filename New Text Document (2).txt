@@ -1,0 +1,496 @@
+USE [master]
+GO
+/****** Object:  Database [FruitStoreDb]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE DATABASE [FruitStoreDb]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'FruitStoreDb', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.NGUYENPHUC\MSSQL\DATA\FruitStoreDb.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'FruitStoreDb_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.NGUYENPHUC\MSSQL\DATA\FruitStoreDb_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
+GO
+ALTER DATABASE [FruitStoreDb] SET COMPATIBILITY_LEVEL = 160
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [FruitStoreDb].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [FruitStoreDb] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET AUTO_CLOSE ON 
+GO
+ALTER DATABASE [FruitStoreDb] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [FruitStoreDb] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [FruitStoreDb] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [FruitStoreDb] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [FruitStoreDb] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [FruitStoreDb] SET  MULTI_USER 
+GO
+ALTER DATABASE [FruitStoreDb] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [FruitStoreDb] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [FruitStoreDb] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [FruitStoreDb] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [FruitStoreDb] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [FruitStoreDb] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+ALTER DATABASE [FruitStoreDb] SET QUERY_STORE = ON
+GO
+ALTER DATABASE [FruitStoreDb] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
+GO
+USE [FruitStoreDb]
+GO
+/****** Object:  Table [dbo].[Admins]    Script Date: 8/13/2026 8:44:03 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Admins](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Username] [varchar](100) NOT NULL,
+	[PasswordHash] [varchar](500) NOT NULL,
+	[FullName] [nvarchar](150) NULL,
+	[IsActive] [bit] NOT NULL,
+	[CreatedAt] [datetime2](7) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Categories]    Script Date: 8/13/2026 8:44:03 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Categories](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](150) NOT NULL,
+	[Description] [nvarchar](500) NULL,
+	[IsActive] [bit] NOT NULL,
+	[CreatedAt] [datetime2](7) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Inventories]    Script Date: 8/13/2026 8:44:03 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Inventories](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[ProductId] [int] NOT NULL,
+	[BatchCode] [nvarchar](50) NOT NULL,
+	[QuantityReceived] [int] NOT NULL,
+	[RemainingQuantity] [int] NOT NULL,
+	[ReceivedAt] [datetime] NOT NULL,
+	[ExpiryDate] [date] NOT NULL,
+	[UnitCost] [decimal](18, 2) NULL,
+	[SupplierName] [nvarchar](150) NULL,
+	[Note] [nvarchar](500) NULL,
+	[CreatedAt] [datetime] NOT NULL,
+ CONSTRAINT [PK_Inventories] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[OrderDetails]    Script Date: 8/13/2026 8:44:03 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[OrderDetails](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[OrderId] [int] NOT NULL,
+	[ProductId] [int] NOT NULL,
+	[ProductName] [nvarchar](200) NOT NULL,
+	[UnitPrice] [decimal](18, 2) NOT NULL,
+	[Quantity] [int] NOT NULL,
+	[SubTotal]  AS ([UnitPrice]*[Quantity]) PERSISTED,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Orders]    Script Date: 8/13/2026 8:44:03 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Orders](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[OrderCode] [varchar](50) NOT NULL,
+	[CustomerName] [nvarchar](150) NOT NULL,
+	[CustomerPhone] [varchar](20) NOT NULL,
+	[CustomerEmail] [varchar](150) NULL,
+	[ShippingAddress] [nvarchar](500) NOT NULL,
+	[Note] [nvarchar](500) NULL,
+	[TotalAmount] [decimal](18, 2) NOT NULL,
+	[OrderStatus] [varchar](30) NOT NULL,
+	[CreatedAt] [datetime2](7) NOT NULL,
+	[UpdatedAt] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Payments]    Script Date: 8/13/2026 8:44:03 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Payments](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[OrderId] [int] NOT NULL,
+	[PaymentMethod] [varchar](30) NOT NULL,
+	[PaymentStatus] [varchar](30) NOT NULL,
+	[Amount] [decimal](18, 2) NOT NULL,
+	[TransactionCode] [varchar](150) NULL,
+	[PaymentUrl] [varchar](1000) NULL,
+	[PaidAt] [datetime2](7) NULL,
+	[CreatedAt] [datetime2](7) NOT NULL,
+	[UpdatedAt] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Products]    Script Date: 8/13/2026 8:44:03 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Products](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[CategoryId] [int] NOT NULL,
+	[Name] [nvarchar](200) NOT NULL,
+	[Description] [nvarchar](max) NULL,
+	[Price] [decimal](18, 2) NOT NULL,
+	[StockQuantity] [int] NOT NULL,
+	[Unit] [nvarchar](50) NOT NULL,
+	[ImageUrl] [varchar](500) NULL,
+	[IsActive] [bit] NOT NULL,
+	[CreatedAt] [datetime2](7) NOT NULL,
+	[UpdatedAt] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+SET IDENTITY_INSERT [dbo].[Admins] ON 
+
+INSERT [dbo].[Admins] ([Id], [Username], [PasswordHash], [FullName], [IsActive], [CreatedAt]) VALUES (1, N'admin', N'PASSWORD_HASH_HERE', N'Quản trị viên', 1, CAST(N'2026-07-23T23:47:30.1700000' AS DateTime2))
+INSERT [dbo].[Admins] ([Id], [Username], [PasswordHash], [FullName], [IsActive], [CreatedAt]) VALUES (2, N'admin.fruitshop', N'AQAAAAIAAYagAAAAEFt4JVgSlY60NXZeTHobKmecjMckkaWQPi0cGlIRg6eUp58qXIH2d/xkvM6VUH2aFA==', N'FruitShop Administrator', 1, CAST(N'2026-07-24T00:50:12.5566667' AS DateTime2))
+INSERT [dbo].[Admins] ([Id], [Username], [PasswordHash], [FullName], [IsActive], [CreatedAt]) VALUES (3, N'phamtrungduc', N'AQAAAAIAAYagAAAAEGSzkiDU3rFy7aDVBK2n42n6QpOQivzmrWSMgMQCqhfOe3e6hRnUNJ27TZshTuWEXA==', N'Phạm Trung Đức', 1, CAST(N'2026-07-24T00:54:57.8533333' AS DateTime2))
+INSERT [dbo].[Admins] ([Id], [Username], [PasswordHash], [FullName], [IsActive], [CreatedAt]) VALUES (4, N'nguyenphuc', N'AQAAAAIAAYagAAAAEOC+EBKWKLflA8YJcSCoCKFKB+KdtrNaEa8WezbbhYxWJnuFl40jg8mO/ZuSnhOtDQ==', N'Nguyễn Đức Phúc', 1, CAST(N'2026-07-25T10:14:57.3823818' AS DateTime2))
+SET IDENTITY_INSERT [dbo].[Admins] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Categories] ON 
+
+INSERT [dbo].[Categories] ([Id], [Name], [Description], [IsActive], [CreatedAt]) VALUES (1, N'Hoa quả trong nước', N'Các loại hoa quả được trồng trong nước', 1, CAST(N'2026-07-23T23:47:30.1800000' AS DateTime2))
+INSERT [dbo].[Categories] ([Id], [Name], [Description], [IsActive], [CreatedAt]) VALUES (2, N'Hoa quả nhập khẩu', N'Các loại hoa quả nhập khẩu', 1, CAST(N'2026-07-23T23:47:30.1800000' AS DateTime2))
+INSERT [dbo].[Categories] ([Id], [Name], [Description], [IsActive], [CreatedAt]) VALUES (3, N'Combo hoa quả', N'Các loại combo hoa quả đóng gói', 1, CAST(N'2026-07-23T23:47:30.1800000' AS DateTime2))
+SET IDENTITY_INSERT [dbo].[Categories] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Inventories] ON 
+
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (1, 1, N'OPENING-1', 100, 100, CAST(N'2026-07-23T23:47:30.187' AS DateTime), CAST(N'2026-07-26' AS Date), NULL, NULL, N'Migrated opening balance', CAST(N'2026-07-24T10:41:22.400' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (2, 2, N'OPENING-2', 50, 50, CAST(N'2026-07-23T23:47:30.187' AS DateTime), CAST(N'2026-07-28' AS Date), NULL, NULL, N'Migrated opening balance', CAST(N'2026-07-24T10:41:22.400' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (3, 3, N'OPENING-3', 80, 80, CAST(N'2026-07-23T23:47:30.187' AS DateTime), CAST(N'2027-07-24' AS Date), NULL, NULL, N'Migrated opening balance', CAST(N'2026-07-24T10:41:22.400' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (4, 4, N'OPENING-4', 400, 400, CAST(N'2026-07-23T23:47:30.187' AS DateTime), CAST(N'2026-08-02' AS Date), NULL, NULL, N'Migrated opening balance', CAST(N'2026-07-24T10:41:22.400' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (5, 1, N'HE', 123, 123, CAST(N'2026-07-24T10:45:50.730' AS DateTime), CAST(N'2026-07-26' AS Date), NULL, NULL, NULL, CAST(N'2026-07-24T10:45:50.740' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (6, 5, N'ER', 12, 12, CAST(N'2026-07-24T10:46:00.320' AS DateTime), CAST(N'2026-07-29' AS Date), NULL, NULL, NULL, CAST(N'2026-07-24T10:46:00.317' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (7, 5, N'EE', 123, 123, CAST(N'2026-07-24T10:48:59.700' AS DateTime), CAST(N'2026-07-31' AS Date), NULL, NULL, NULL, CAST(N'2026-07-24T10:48:59.703' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (8, 6, N'OPENING-9', 19, 19, CAST(N'2026-07-25T10:33:45.530' AS DateTime), CAST(N'2026-07-31' AS Date), NULL, NULL, NULL, CAST(N'2026-07-25T10:33:45.530' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (9, 6, N'lo 2', 1, 1, CAST(N'2026-07-25T13:12:10.773' AS DateTime), CAST(N'2026-08-01' AS Date), NULL, NULL, NULL, CAST(N'2026-07-25T13:12:10.773' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (10, 6, N'lo lo', 100, 97, CAST(N'2026-07-25T14:41:04.277' AS DateTime), CAST(N'2026-07-26' AS Date), NULL, NULL, NULL, CAST(N'2026-07-25T14:41:04.277' AS DateTime))
+INSERT [dbo].[Inventories] ([Id], [ProductId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note], [CreatedAt]) VALUES (11, 5, N'lo lô lo', 12, 12, CAST(N'2026-07-25T16:38:09.383' AS DateTime), CAST(N'2026-07-26' AS Date), NULL, NULL, NULL, CAST(N'2026-07-25T16:38:09.383' AS DateTime))
+SET IDENTITY_INSERT [dbo].[Inventories] OFF
+GO
+SET IDENTITY_INSERT [dbo].[OrderDetails] ON 
+
+INSERT [dbo].[OrderDetails] ([Id], [OrderId], [ProductId], [ProductName], [UnitPrice], [Quantity]) VALUES (4, 2, 1, N'Cam Cao Phong', CAST(45000.00 AS Decimal(18, 2)), 1)
+INSERT [dbo].[OrderDetails] ([Id], [OrderId], [ProductId], [ProductName], [UnitPrice], [Quantity]) VALUES (5, 2, 2, N'Bưởi da xanh', CAST(65000.00 AS Decimal(18, 2)), 1)
+INSERT [dbo].[OrderDetails] ([Id], [OrderId], [ProductId], [ProductName], [UnitPrice], [Quantity]) VALUES (6, 3, 2, N'Bưởi da xanh', CAST(65000.00 AS Decimal(18, 2)), 1)
+INSERT [dbo].[OrderDetails] ([Id], [OrderId], [ProductId], [ProductName], [UnitPrice], [Quantity]) VALUES (7, 4, 2, N'Bưởi da xanh', CAST(65000.00 AS Decimal(18, 2)), 1)
+INSERT [dbo].[OrderDetails] ([Id], [OrderId], [ProductId], [ProductName], [UnitPrice], [Quantity]) VALUES (8, 5, 6, N'Táo Xnah', CAST(20.00 AS Decimal(18, 2)), 1)
+INSERT [dbo].[OrderDetails] ([Id], [OrderId], [ProductId], [ProductName], [UnitPrice], [Quantity]) VALUES (9, 6, 6, N'Táo Xnah', CAST(20.00 AS Decimal(18, 2)), 1)
+INSERT [dbo].[OrderDetails] ([Id], [OrderId], [ProductId], [ProductName], [UnitPrice], [Quantity]) VALUES (10, 7, 6, N'Táo Xnah', CAST(20.00 AS Decimal(18, 2)), 1)
+SET IDENTITY_INSERT [dbo].[OrderDetails] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Orders] ON 
+
+INSERT [dbo].[Orders] ([Id], [OrderCode], [CustomerName], [CustomerPhone], [CustomerEmail], [ShippingAddress], [Note], [TotalAmount], [OrderStatus], [CreatedAt], [UpdatedAt]) VALUES (2, N'ORD-20260723172119-6118', N'Trung Đức Phạm', N'0329255823', N'ptrungduc1011@gmail.com', N'Phù Sa', NULL, CAST(110000.00 AS Decimal(18, 2)), N'Completed', CAST(N'2026-07-24T00:21:19.7195153' AS DateTime2), CAST(N'2026-07-25T14:08:41.4244157' AS DateTime2))
+INSERT [dbo].[Orders] ([Id], [OrderCode], [CustomerName], [CustomerPhone], [CustomerEmail], [ShippingAddress], [Note], [TotalAmount], [OrderStatus], [CreatedAt], [UpdatedAt]) VALUES (3, N'ORD-20260723173653-3514', N'Trung Đức Phạm', N'0329255823', N'ptrungduc1011@gmail.com', N'Phù Sa', NULL, CAST(65000.00 AS Decimal(18, 2)), N'Completed', CAST(N'2026-07-24T00:36:53.3201061' AS DateTime2), CAST(N'2026-07-25T13:54:37.9158842' AS DateTime2))
+INSERT [dbo].[Orders] ([Id], [OrderCode], [CustomerName], [CustomerPhone], [CustomerEmail], [ShippingAddress], [Note], [TotalAmount], [OrderStatus], [CreatedAt], [UpdatedAt]) VALUES (4, N'ORD-20260723183523-3981', N'Trung Đức Phạm', N'0329255823', N'ptrungduc1011@gmail.com', N'Phù Sa', NULL, CAST(65000.00 AS Decimal(18, 2)), N'Completed', CAST(N'2026-07-24T01:35:23.2856516' AS DateTime2), CAST(N'2026-07-25T13:43:45.4332111' AS DateTime2))
+INSERT [dbo].[Orders] ([Id], [OrderCode], [CustomerName], [CustomerPhone], [CustomerEmail], [ShippingAddress], [Note], [TotalAmount], [OrderStatus], [CreatedAt], [UpdatedAt]) VALUES (5, N'ORD-20260725074830-3120', N'Nguyễn Đức Phúc', N'0975235859', N'nguyenducphuc.pt19@gmail.com', N'phu tho', NULL, CAST(20.00 AS Decimal(18, 2)), N'Completed', CAST(N'2026-07-25T14:48:30.6276755' AS DateTime2), CAST(N'2026-07-25T15:56:35.4154507' AS DateTime2))
+INSERT [dbo].[Orders] ([Id], [OrderCode], [CustomerName], [CustomerPhone], [CustomerEmail], [ShippingAddress], [Note], [TotalAmount], [OrderStatus], [CreatedAt], [UpdatedAt]) VALUES (6, N'ORD-20260725074924-6106', N'Nguyễn Đức Phúc', N'0975235859', N'nguyenducphuc.pt19@gmail.com', N'phu tho', NULL, CAST(20.00 AS Decimal(18, 2)), N'Completed', CAST(N'2026-07-25T14:49:24.7044630' AS DateTime2), CAST(N'2026-07-25T15:52:32.2148736' AS DateTime2))
+INSERT [dbo].[Orders] ([Id], [OrderCode], [CustomerName], [CustomerPhone], [CustomerEmail], [ShippingAddress], [Note], [TotalAmount], [OrderStatus], [CreatedAt], [UpdatedAt]) VALUES (7, N'ORD-20260725085727-9273', N'Nguyễn Đức Phúc', N'0975235859', N'nguyenducphuc.pt19@gmail.com', N'lao cai', NULL, CAST(20.00 AS Decimal(18, 2)), N'Completed', CAST(N'2026-07-25T15:57:27.9617513' AS DateTime2), CAST(N'2026-07-25T15:57:45.5649474' AS DateTime2))
+SET IDENTITY_INSERT [dbo].[Orders] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Payments] ON 
+
+INSERT [dbo].[Payments] ([Id], [OrderId], [PaymentMethod], [PaymentStatus], [Amount], [TransactionCode], [PaymentUrl], [PaidAt], [CreatedAt], [UpdatedAt]) VALUES (2, 2, N'COD', N'Paid', CAST(110000.00 AS Decimal(18, 2)), NULL, NULL, CAST(N'2026-07-25T14:08:41.4244157' AS DateTime2), CAST(N'2026-07-24T00:21:19.7204702' AS DateTime2), NULL)
+INSERT [dbo].[Payments] ([Id], [OrderId], [PaymentMethod], [PaymentStatus], [Amount], [TransactionCode], [PaymentUrl], [PaidAt], [CreatedAt], [UpdatedAt]) VALUES (3, 3, N'COD', N'Paid', CAST(65000.00 AS Decimal(18, 2)), NULL, NULL, CAST(N'2026-07-25T13:54:37.9158842' AS DateTime2), CAST(N'2026-07-24T00:36:53.3212399' AS DateTime2), NULL)
+INSERT [dbo].[Payments] ([Id], [OrderId], [PaymentMethod], [PaymentStatus], [Amount], [TransactionCode], [PaymentUrl], [PaidAt], [CreatedAt], [UpdatedAt]) VALUES (4, 4, N'COD', N'Paid', CAST(65000.00 AS Decimal(18, 2)), NULL, NULL, CAST(N'2026-07-25T13:43:45.4332111' AS DateTime2), CAST(N'2026-07-24T01:35:23.2864442' AS DateTime2), NULL)
+INSERT [dbo].[Payments] ([Id], [OrderId], [PaymentMethod], [PaymentStatus], [Amount], [TransactionCode], [PaymentUrl], [PaidAt], [CreatedAt], [UpdatedAt]) VALUES (5, 5, N'COD', N'Paid', CAST(20.00 AS Decimal(18, 2)), NULL, NULL, CAST(N'2026-07-25T15:56:35.4154507' AS DateTime2), CAST(N'2026-07-25T14:48:30.6286539' AS DateTime2), NULL)
+INSERT [dbo].[Payments] ([Id], [OrderId], [PaymentMethod], [PaymentStatus], [Amount], [TransactionCode], [PaymentUrl], [PaidAt], [CreatedAt], [UpdatedAt]) VALUES (6, 6, N'COD', N'Paid', CAST(20.00 AS Decimal(18, 2)), NULL, NULL, CAST(N'2026-07-25T15:52:32.2148736' AS DateTime2), CAST(N'2026-07-25T14:49:24.7044738' AS DateTime2), NULL)
+INSERT [dbo].[Payments] ([Id], [OrderId], [PaymentMethod], [PaymentStatus], [Amount], [TransactionCode], [PaymentUrl], [PaidAt], [CreatedAt], [UpdatedAt]) VALUES (7, 7, N'COD', N'Paid', CAST(20.00 AS Decimal(18, 2)), NULL, NULL, CAST(N'2026-07-25T15:57:45.5649474' AS DateTime2), CAST(N'2026-07-25T15:57:27.9628801' AS DateTime2), NULL)
+SET IDENTITY_INSERT [dbo].[Payments] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Products] ON 
+
+INSERT [dbo].[Products] ([Id], [CategoryId], [Name], [Description], [Price], [StockQuantity], [Unit], [ImageUrl], [IsActive], [CreatedAt], [UpdatedAt]) VALUES (1, 1, N'Cam Cao Phong', N'Cam Cao Phong tươi, vị ngọt', CAST(45000.00 AS Decimal(18, 2)), 223, N'kg', N'/images/products/077bbacf98424bdab6f511a2a7e7f325.jpg', 0, CAST(N'2026-07-23T23:47:30.1866667' AS DateTime2), CAST(N'2026-07-25T10:17:45.9147955' AS DateTime2))
+INSERT [dbo].[Products] ([Id], [CategoryId], [Name], [Description], [Price], [StockQuantity], [Unit], [ImageUrl], [IsActive], [CreatedAt], [UpdatedAt]) VALUES (2, 1, N'Bưởi da xanh', N'Bưởi da xanh Bến Tre', CAST(65000.00 AS Decimal(18, 2)), 50, N'kg', N'/images/products/10a333dda3c24f60b4761a77b2962c74.jpg', 1, CAST(N'2026-07-23T23:47:30.1866667' AS DateTime2), CAST(N'2026-07-25T15:52:06.4449397' AS DateTime2))
+INSERT [dbo].[Products] ([Id], [CategoryId], [Name], [Description], [Price], [StockQuantity], [Unit], [ImageUrl], [IsActive], [CreatedAt], [UpdatedAt]) VALUES (3, 2, N'Táo đỏ Mỹ', N'Táo đỏ nhập khẩu từ Mỹ', CAST(85000.00 AS Decimal(18, 2)), 80, N'kg', N'/images/tao-do-my.jpg', 0, CAST(N'2026-07-23T23:47:30.1866667' AS DateTime2), CAST(N'2026-07-24T01:17:36.0133333' AS DateTime2))
+INSERT [dbo].[Products] ([Id], [CategoryId], [Name], [Description], [Price], [StockQuantity], [Unit], [ImageUrl], [IsActive], [CreatedAt], [UpdatedAt]) VALUES (4, 2, N'Nho xanh không hạt', N'Nho xanh nhập khẩu', CAST(120000.00 AS Decimal(18, 2)), 400, N'kg', N'/images/products/24c043aba6464932a0c86f8c910a6781.jpg', 1, CAST(N'2026-07-23T23:47:30.1866667' AS DateTime2), CAST(N'2026-07-25T15:51:58.6593912' AS DateTime2))
+INSERT [dbo].[Products] ([Id], [CategoryId], [Name], [Description], [Price], [StockQuantity], [Unit], [ImageUrl], [IsActive], [CreatedAt], [UpdatedAt]) VALUES (5, 1, N'Bưởi Đoan Hùng', NULL, CAST(1111.00 AS Decimal(18, 2)), 147, N'kg', N'/images/products/134a4dc8ba4940fdbed3bb732123016d.png', 1, CAST(N'2026-07-24T01:07:53.1566667' AS DateTime2), CAST(N'2026-07-25T16:38:09.4386482' AS DateTime2))
+INSERT [dbo].[Products] ([Id], [CategoryId], [Name], [Description], [Price], [StockQuantity], [Unit], [ImageUrl], [IsActive], [CreatedAt], [UpdatedAt]) VALUES (6, 2, N'Táo Xnah', N'Táo có độc', CAST(40.00 AS Decimal(18, 2)), 117, N'kg', N'/images/products/280b9d64fee94f598a23c642c6e27520.jpg', 1, CAST(N'2026-07-25T10:31:05.4411435' AS DateTime2), CAST(N'2026-07-25T15:57:28.0980490' AS DateTime2))
+SET IDENTITY_INSERT [dbo].[Products] OFF
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ_Admins_Username]    Script Date: 8/13/2026 8:44:03 AM ******/
+ALTER TABLE [dbo].[Admins] ADD  CONSTRAINT [UQ_Admins_Username] UNIQUE NONCLUSTERED 
+(
+	[Username] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ_Inventories_Product_Batch]    Script Date: 8/13/2026 8:44:03 AM ******/
+ALTER TABLE [dbo].[Inventories] ADD  CONSTRAINT [UQ_Inventories_Product_Batch] UNIQUE NONCLUSTERED 
+(
+	[ProductId] ASC,
+	[BatchCode] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Inventories_Product_Expiry_Remaining]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_Inventories_Product_Expiry_Remaining] ON [dbo].[Inventories]
+(
+	[ProductId] ASC,
+	[ExpiryDate] ASC,
+	[RemainingQuantity] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [UQ_OrderDetails_Order_Product]    Script Date: 8/13/2026 8:44:03 AM ******/
+ALTER TABLE [dbo].[OrderDetails] ADD  CONSTRAINT [UQ_OrderDetails_Order_Product] UNIQUE NONCLUSTERED 
+(
+	[OrderId] ASC,
+	[ProductId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_OrderDetails_OrderId]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_OrderDetails_OrderId] ON [dbo].[OrderDetails]
+(
+	[OrderId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ_Orders_OrderCode]    Script Date: 8/13/2026 8:44:03 AM ******/
+ALTER TABLE [dbo].[Orders] ADD  CONSTRAINT [UQ_Orders_OrderCode] UNIQUE NONCLUSTERED 
+(
+	[OrderCode] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Orders_CreatedAt]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_Orders_CreatedAt] ON [dbo].[Orders]
+(
+	[CreatedAt] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_Orders_CustomerPhone]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_Orders_CustomerPhone] ON [dbo].[Orders]
+(
+	[CustomerPhone] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_Orders_OrderStatus]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_Orders_OrderStatus] ON [dbo].[Orders]
+(
+	[OrderStatus] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Payments_OrderId]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_Payments_OrderId] ON [dbo].[Payments]
+(
+	[OrderId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_Payments_TransactionCode]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_Payments_TransactionCode] ON [dbo].[Payments]
+(
+	[TransactionCode] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Products_CategoryId]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_Products_CategoryId] ON [dbo].[Products]
+(
+	[CategoryId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_Products_Name]    Script Date: 8/13/2026 8:44:03 AM ******/
+CREATE NONCLUSTERED INDEX [IX_Products_Name] ON [dbo].[Products]
+(
+	[Name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Admins] ADD  DEFAULT ((1)) FOR [IsActive]
+GO
+ALTER TABLE [dbo].[Admins] ADD  DEFAULT (getdate()) FOR [CreatedAt]
+GO
+ALTER TABLE [dbo].[Categories] ADD  DEFAULT ((1)) FOR [IsActive]
+GO
+ALTER TABLE [dbo].[Categories] ADD  DEFAULT (getdate()) FOR [CreatedAt]
+GO
+ALTER TABLE [dbo].[Inventories] ADD  CONSTRAINT [DF_Inventories_ReceivedAt]  DEFAULT (getdate()) FOR [ReceivedAt]
+GO
+ALTER TABLE [dbo].[Inventories] ADD  CONSTRAINT [DF_Inventories_CreatedAt]  DEFAULT (getdate()) FOR [CreatedAt]
+GO
+ALTER TABLE [dbo].[Orders] ADD  DEFAULT ('Pending') FOR [OrderStatus]
+GO
+ALTER TABLE [dbo].[Orders] ADD  DEFAULT (getdate()) FOR [CreatedAt]
+GO
+ALTER TABLE [dbo].[Payments] ADD  DEFAULT ('Pending') FOR [PaymentStatus]
+GO
+ALTER TABLE [dbo].[Payments] ADD  DEFAULT (getdate()) FOR [CreatedAt]
+GO
+ALTER TABLE [dbo].[Products] ADD  DEFAULT ((0)) FOR [StockQuantity]
+GO
+ALTER TABLE [dbo].[Products] ADD  DEFAULT ((1)) FOR [IsActive]
+GO
+ALTER TABLE [dbo].[Products] ADD  DEFAULT (getdate()) FOR [CreatedAt]
+GO
+ALTER TABLE [dbo].[Inventories]  WITH CHECK ADD  CONSTRAINT [FK_Inventories_Products] FOREIGN KEY([ProductId])
+REFERENCES [dbo].[Products] ([Id])
+GO
+ALTER TABLE [dbo].[Inventories] CHECK CONSTRAINT [FK_Inventories_Products]
+GO
+ALTER TABLE [dbo].[OrderDetails]  WITH CHECK ADD  CONSTRAINT [FK_OrderDetails_Orders] FOREIGN KEY([OrderId])
+REFERENCES [dbo].[Orders] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[OrderDetails] CHECK CONSTRAINT [FK_OrderDetails_Orders]
+GO
+ALTER TABLE [dbo].[OrderDetails]  WITH CHECK ADD  CONSTRAINT [FK_OrderDetails_Products] FOREIGN KEY([ProductId])
+REFERENCES [dbo].[Products] ([Id])
+GO
+ALTER TABLE [dbo].[OrderDetails] CHECK CONSTRAINT [FK_OrderDetails_Products]
+GO
+ALTER TABLE [dbo].[Payments]  WITH CHECK ADD  CONSTRAINT [FK_Payments_Orders] FOREIGN KEY([OrderId])
+REFERENCES [dbo].[Orders] ([Id])
+GO
+ALTER TABLE [dbo].[Payments] CHECK CONSTRAINT [FK_Payments_Orders]
+GO
+ALTER TABLE [dbo].[Products]  WITH CHECK ADD  CONSTRAINT [FK_Products_Categories] FOREIGN KEY([CategoryId])
+REFERENCES [dbo].[Categories] ([Id])
+GO
+ALTER TABLE [dbo].[Products] CHECK CONSTRAINT [FK_Products_Categories]
+GO
+ALTER TABLE [dbo].[Inventories]  WITH CHECK ADD  CONSTRAINT [CK_Inventories_QuantityReceived] CHECK  (([QuantityReceived]>(0)))
+GO
+ALTER TABLE [dbo].[Inventories] CHECK CONSTRAINT [CK_Inventories_QuantityReceived]
+GO
+ALTER TABLE [dbo].[Inventories]  WITH CHECK ADD  CONSTRAINT [CK_Inventories_RemainingQuantity] CHECK  (([RemainingQuantity]>=(0) AND [RemainingQuantity]<=[QuantityReceived]))
+GO
+ALTER TABLE [dbo].[Inventories] CHECK CONSTRAINT [CK_Inventories_RemainingQuantity]
+GO
+ALTER TABLE [dbo].[OrderDetails]  WITH CHECK ADD  CONSTRAINT [CK_OrderDetails_Quantity] CHECK  (([Quantity]>(0)))
+GO
+ALTER TABLE [dbo].[OrderDetails] CHECK CONSTRAINT [CK_OrderDetails_Quantity]
+GO
+ALTER TABLE [dbo].[OrderDetails]  WITH CHECK ADD  CONSTRAINT [CK_OrderDetails_UnitPrice] CHECK  (([UnitPrice]>=(0)))
+GO
+ALTER TABLE [dbo].[OrderDetails] CHECK CONSTRAINT [CK_OrderDetails_UnitPrice]
+GO
+ALTER TABLE [dbo].[Orders]  WITH CHECK ADD  CONSTRAINT [CK_Orders_Status] CHECK  (([OrderStatus]='Cancelled' OR [OrderStatus]='Completed' OR [OrderStatus]='Shipping' OR [OrderStatus]='Confirmed' OR [OrderStatus]='Pending'))
+GO
+ALTER TABLE [dbo].[Orders] CHECK CONSTRAINT [CK_Orders_Status]
+GO
+ALTER TABLE [dbo].[Orders]  WITH CHECK ADD  CONSTRAINT [CK_Orders_TotalAmount] CHECK  (([TotalAmount]>=(0)))
+GO
+ALTER TABLE [dbo].[Orders] CHECK CONSTRAINT [CK_Orders_TotalAmount]
+GO
+ALTER TABLE [dbo].[Payments]  WITH CHECK ADD  CONSTRAINT [CK_Payments_Amount] CHECK  (([Amount]>=(0)))
+GO
+ALTER TABLE [dbo].[Payments] CHECK CONSTRAINT [CK_Payments_Amount]
+GO
+ALTER TABLE [dbo].[Payments]  WITH CHECK ADD  CONSTRAINT [CK_Payments_Method] CHECK  (([PaymentMethod]='VNPay' OR [PaymentMethod]='Momo' OR [PaymentMethod]='PayOS' OR [PaymentMethod]='BankTransfer' OR [PaymentMethod]='COD'))
+GO
+ALTER TABLE [dbo].[Payments] CHECK CONSTRAINT [CK_Payments_Method]
+GO
+ALTER TABLE [dbo].[Payments]  WITH CHECK ADD  CONSTRAINT [CK_Payments_Status] CHECK  (([PaymentStatus]='Refunded' OR [PaymentStatus]='Cancelled' OR [PaymentStatus]='Failed' OR [PaymentStatus]='Paid' OR [PaymentStatus]='Pending'))
+GO
+ALTER TABLE [dbo].[Payments] CHECK CONSTRAINT [CK_Payments_Status]
+GO
+ALTER TABLE [dbo].[Products]  WITH CHECK ADD  CONSTRAINT [CK_Products_Price] CHECK  (([Price]>=(0)))
+GO
+ALTER TABLE [dbo].[Products] CHECK CONSTRAINT [CK_Products_Price]
+GO
+ALTER TABLE [dbo].[Products]  WITH CHECK ADD  CONSTRAINT [CK_Products_StockQuantity] CHECK  (([StockQuantity]>=(0)))
+GO
+ALTER TABLE [dbo].[Products] CHECK CONSTRAINT [CK_Products_StockQuantity]
+GO
+USE [master]
+GO
+ALTER DATABASE [FruitStoreDb] SET  READ_WRITE 
+GO

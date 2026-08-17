@@ -1,0 +1,183 @@
+﻿@{
+    ViewData["Title"] = "Trải Nghiệm Trái Cây Thượng Hạng";
+}
+
+<style>
+    /* Hero Banner */
+    .hero-section {
+        position: relative;
+        padding: 100px 0;
+        background: linear-gradient(180deg, rgba(250,248,245,0.3) 0%, rgba(243,239,234,0.8) 100%), url('https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=1600') center/cover;
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+    }
+
+    .hero-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        padding: 3rem;
+        border: 1px solid rgba(197, 168, 128, 0.3);
+    }
+
+    /* Product Card Phong Cách Luxury */
+    .fruit-card {
+        background: #FFFFFF;
+        border: none;
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+        .fruit-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+        }
+
+        .fruit-card img {
+            height: 280px;
+            object-fit: cover;
+        }
+
+    .fruit-tag {
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent-gold);
+    }
+
+    /* Hospitality Value Section */
+    .value-box {
+        border-left: 2px solid var(--accent-gold);
+        padding-left: 1.5rem;
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="hero-card shadow-sm">
+                    <span class="fruit-tag mb-2 d-block">LE FRUIT BOUTIQUE SELECTION</span>
+                    <h1 class="display-4 font-serif mb-3">Sự Tinh Tế Trong Từng Hương Vị</h1>
+                    <p class="text-muted mb-4">
+                        Mang trải nghiệm ẩm thực trái cây chuẩn resort 5 sao đến không gian sống của quý khách. Nhập khẩu trực tiếp qua đường hàng không mỗi ngày.
+                    </p>
+                    <a asp-controller="Products" asp-action="ListProduct" class="btn btn-luxury me-3">KHÁM PHÁ MENU</a>
+                    <a href="#concierge" class="btn btn-outline-luxury">DỊCH VỤ TƯ VẤN</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section (Tương tự dịch vụ Concierge của khách sạn) -->
+<section class="py-5 my-4">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="value-box">
+                    <h4 class="font-serif mb-2">Tuyển Chọn Nghệ Nhân</h4>
+                    <p class="small text-muted m-0">Từng quả được kiểm tra độ đường (Brix), độ tươi và hương thơm trước khi đóng gói.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-box">
+                    <h4 class="font-serif mb-2">Giao Hàng Chuyên Biệt</h4>
+                    <p class="small text-muted m-0">Vận chuyển bằng xe lạnh chuyên dụng, đảm bảo nhiệt độ chuẩn như bảo quản tại cellar.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-box">
+                    <h4 class="font-serif mb-2">Trải Nghiệm Privé</h4>
+                    <p class="small text-muted m-0">Thiết kế hộp quà mạ vàng cao cấp đi kèm thiệp viết tay theo yêu cầu cá nhân.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Collection (Sản phẩm nổi bật) -->
+<section id="collections" class="py-5" style="background-color: #F5F2EC;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="fruit-tag">SEASONAL HIGHLIGHTS</span>
+            <h2 class="display-6 font-serif">Bộ Sưu Tập Mùa Này</h2>
+            <div style="width: 50px; height: 1px; background: var(--accent-gold); margin: 1rem auto;"></div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Product 1 -->
+            <div class="col-md-4">
+                <div class="card fruit-card h-100 p-3">
+                    <img src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?q=80&w=800" class="card-img-top" alt="Nho Mẫu Đơn">
+                    <div class="card-body text-center d-flex flex-column justify-content-between">
+                        <div>
+                            <span class="fruit-tag">JAPAN OKAYAMA</span>
+                            <h3 class="h5 font-serif mt-2">Nho Mẫu Đơn Shine Muscat</h3>
+                            <p class="small text-muted">Hương vị thơm ngọt ngào ngạt, vỏ mỏng, độ Brix > 18.</p>
+                        </div>
+                        <div>
+                            <div class="fs-5 font-serif mb-3" style="color: var(--accent-green);">1.850.000 ₫ / Hộp</div>
+                            <button class="btn btn-outline-luxury w-100">THÊM VÀO GIỎ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="col-md-4">
+                <div class="card fruit-card h-100 p-3">
+                    <img src="https://images.unsplash.com/photo-1528825871115-3581a5387919?q=80&w=800" class="card-img-top" alt="Chuối hoàng gia">
+                    <div class="card-body text-center d-flex flex-column justify-content-between">
+                        <div>
+                            <span class="fruit-tag">TASMANIA AUSTRALIA</span>
+                            <h3 class="h5 font-serif mt-2">Cherry Đỏ Size 32+ Premium</h3>
+                            <p class="small text-muted">Trái cuống xanh tơi, thịt giòn ngọt đậm đà chuẩn thượng hạng.</p>
+                        </div>
+                        <div>
+                            <div class="fs-5 font-serif mb-3" style="color: var(--accent-green);">920.000 ₫ / Kg</div>
+                            <button class="btn btn-outline-luxury w-100">THÊM VÀO GIỎ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="col-md-4">
+                <div class="card fruit-card h-100 p-3">
+                    <img src="https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=800" class="card-img-top" alt="Dâu Tây">
+                    <div class="card-body text-center d-flex flex-column justify-content-between">
+                        <div>
+                            <span class="fruit-tag">KOREA PREMIUM</span>
+                            <h3 class="h5 font-serif mt-2">Dâu Tây Tuyết Seolhyang</h3>
+                            <p class="small text-muted">Hương thơm trái dâu đặc trưng, mềm mại ngọt ngào như kem.</p>
+                        </div>
+                        <div>
+                            <div class="fs-5 font-serif mb-3" style="color: var(--accent-green);">650.000 ₫ / Hộp</div>
+                            <button class="btn btn-outline-luxury w-100">THÊM VÀO GIỎ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Concierge Banner -->
+<section id="concierge" class="py-5 my-5">
+    <div class="container">
+        <div class="row align-items-center bg-white p-4 p-md-5 border" style="border-color: rgba(197, 168, 128, 0.3) !important;">
+            <div class="col-md-6">
+                <img src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000" class="img-fluid" alt="Luxury Gift Box">
+            </div>
+            <div class="col-md-6 mt-4 mt-md-0 ps-md-5">
+                <span class="fruit-tag">EXCLUSIVE GIFTING</span>
+                <h2 class="display-6 font-serif my-3">Dịch Vụ Thiết Kế Giỏ Quà Tận Nơi</h2>
+                <p class="text-muted">
+                    Giống như dịch vụ chăm sóc phòng VIP tại các khách sạn 5 sao, chúng tôi cung cấp giải pháp quà tặng hoa quả nghệ thuật cá nhân hóa cho các sự kiện quan trọng, đối tác cao cấp hoặc quà biếu sang trọng.
+                </p>
+                <a href="#" class="btn btn-luxury mt-3">LIÊN HỆ CONCIERGE</a>
+            </div>
+        </div>
+    </div>
+</section>

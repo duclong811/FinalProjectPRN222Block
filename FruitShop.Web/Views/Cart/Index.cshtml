@@ -1,0 +1,61 @@
+@model FruitShop.Web.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+}
+
+<section class="py-5">
+    <div class="container">
+        <h1 class="display-6 font-serif mb-4">Giỏ Hàng Của Quý Khách</h1>
+
+        @if (TempData["CartMessage"] is string message)
+        {
+            <div class="alert alert-info">@message</div>
+        }
+
+        @if (Model.IsEmpty)
+        {
+            <div class="bg-white border p-5 text-center">
+                <p class="text-muted mb-4">Giỏ hàng hiện chưa có sản phẩm.</p>
+                <a asp-controller="Products" asp-action="ListProduct" class="btn btn-luxury">XEM SẢN PHẨM</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="bg-white border">
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="p-3 border-bottom d-flex gap-3 align-items-center">
+                                <img src="@(string.IsNullOrWhiteSpace(item.ImageUrl) ? "https://placehold.co/120x100?text=Fruit" : item.ImageUrl)" alt="@item.Name" style="width: 100px; height: 85px; object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <h2 class="h5 font-serif mb-1">@item.Name</h2>
+                                    <div class="small text-muted">Lô @item.BatchCode · HSD @item.ExpiryDate.ToString("dd/MM/yyyy")</div>
+                                    <div class="small text-muted">@item.UnitPrice.ToString("N0") ₫ / @item.Unit</div>
+                                </div>
+                                <form asp-action="Update" method="post" class="d-flex align-items-center gap-2">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="inventoryId" value="@item.InventoryId" />
+                                    <input class="form-control" type="number" name="quantity" value="@item.Quantity" min="1" max="@item.AvailableStock" style="width: 75px;">
+                                    <button class="btn btn-outline-luxury py-2 px-3" type="submit" title="Cập nhật"><i class="bi bi-arrow-repeat"></i></button>
+                                </form>
+                                <div class="text-end" style="min-width: 110px;">
+                                    <div class="fw-semibold">@item.LineTotal.ToString("N0") ₫</div>
+                                    <form asp-action="Remove" method="post" class="mt-2"><input type="hidden" name="productId" value="@item.ProductId" /><input type="hidden" name="inventoryId" value="@item.InventoryId" /><button class="btn btn-link text-danger p-0 small" type="submit">Xóa</button></form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="bg-white border p-4">
+                        <h2 class="h4 font-serif border-bottom pb-3">Tóm Tắt Đơn Hàng</h2>
+                        <div class="d-flex justify-content-between mt-3"><span>@Model.ItemCount sản phẩm</span><strong>@Model.TotalAmount.ToString("N0") ₫</strong></div>
+                        <a asp-action="Checkout" class="btn btn-luxury w-100 mt-4">TIẾN HÀNH THANH TOÁN</a>
+                        <a asp-controller="Products" asp-action="ListProduct" class="btn btn-outline-luxury w-100 mt-2">TIẾP TỤC MUA SẮM</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

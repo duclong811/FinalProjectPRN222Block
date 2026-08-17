@@ -1,0 +1,67 @@
+﻿<Window x:Class="FruitShop.Client.DashboardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="FruitShop Control Center" Height="700" Width="1180"
+        WindowStartupLocation="CenterScreen" Background="#F5F7F4">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="244" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Background="#1F4D30" Padding="22">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Le Fruit" FontSize="30" FontWeight="Bold" Foreground="White" />
+                    <TextBlock x:Name="DashboardSubtitleTextBlock" Text="CONTROL CENTER" Margin="1,2,0,36" FontSize="11" FontWeight="SemiBold" Foreground="#B8D8BF" />
+
+                    <Button x:Name="UsersNavigationButton" Content="Quản lý tài khoản" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,0,0,8" Click="UsersNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" Visibility="Collapsed" />
+                    <Button x:Name="BranchesNavigationButton" Content="Quản lý chi nhánh" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,0,0,8" Click="BranchesNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" Visibility="Collapsed" />
+                    <Button x:Name="ProductsNavigationButton" Content="Quản lý sản phẩm" Height="46" HorizontalContentAlignment="Left" Padding="14,0" Click="ProductsNavigationButton_Click" Background="#39704A" Foreground="White" BorderBrush="Transparent" FontSize="14" FontWeight="SemiBold" Cursor="Hand" />
+                    <Button x:Name="InventoryNavigationButton" Content="Quản lý kho" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,8,0,0" Click="InventoryNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" />
+                    <Button x:Name="OrdersNavigationButton" Content="Quản lý đơn hàng" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,8,0,0" Click="OrdersNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" />
+                    <Button x:Name="ExpiryNavigationButton" Content="Hàng sắp hết hạn" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,8,0,0" Click="ExpiryNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom">
+                    <Separator Margin="0,16,0,16" Background="#FFFFFF33" />
+                    <TextBlock x:Name="AdminNameTextBlock" TextWrapping="Wrap" Foreground="White" FontWeight="SemiBold" />
+                    <TextBlock x:Name="RoleNameTextBlock" Text="Role" Margin="0,3,0,14" Foreground="#B8D8BF" FontSize="12" />
+                    <Button Content="Đăng xuất" Click="SignOutButton_Click" HorizontalContentAlignment="Left" Padding="0" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" Cursor="Hand" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Column="1" Margin="36,30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <DockPanel>
+                <StackPanel>
+                    <TextBlock x:Name="PageTitleTextBlock" Text="Quản lý sản phẩm" FontSize="28" FontWeight="SemiBold" Foreground="#1D2A20" />
+                    <TextBlock x:Name="PageSubtitleTextBlock" Text="Danh sách sản phẩm đang hoạt động từ FruitShop.Server" Margin="0,7,0,0" Foreground="#66706A" FontSize="14" />
+                </StackPanel>
+                <StackPanel x:Name="ProductActionPanel" DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="Tạo sản phẩm" Click="AddProductButton_Click" Height="38" Width="116" Margin="0,0,10,0" Background="#275D38" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" />
+                    <Button Content="Tải lại" Click="RefreshButton_Click" Height="38" Width="100" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" />
+                </StackPanel>
+            </DockPanel>
+            <Border Grid.Row="1" Margin="0,26,0,14" Padding="14,10" Background="#E8F2EA" CornerRadius="8">
+                <TextBlock x:Name="StatusTextBlock" Foreground="#275D38" />
+            </Border>
+            <Border Grid.Row="2" Background="White" CornerRadius="10" BorderBrush="#E0E6E1" BorderThickness="1" Padding="10">
+                <DataGrid x:Name="ProductsDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" SelectionChanged="ProductsDataGrid_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="70" />
+                        <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="2*" />
+                        <DataGridTextColumn Header="Danh mục" Binding="{Binding CategoryName}" Width="*" />
+                        <DataGridTextColumn Header="Giá bán (đ)" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="*" />
+                        <DataGridTextColumn Header="Tồn kho" Binding="{Binding StockQuantity}" Width="90" />
+                        <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="90" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
