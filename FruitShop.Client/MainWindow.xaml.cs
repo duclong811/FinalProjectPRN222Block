@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using System.Windows;
 using System.Windows.Controls;
@@ -65,6 +65,12 @@ public partial class MainWindow : Window
                 ShowStatus(StatusTextBlock, response.Message, false);
                 PasswordBox.SelectAll();
                 PasswordBox.Focus();
+                return;
+            }
+
+            if (string.Equals(response.RoleName, "Customer", StringComparison.OrdinalIgnoreCase))
+            {
+                ShowStatus(StatusTextBlock, "Tài khoản khách hàng vui lòng đăng nhập trên Website mua hàng.", false);
                 return;
             }
 
