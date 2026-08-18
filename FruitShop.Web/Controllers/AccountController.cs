@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using FruitShop.Shared.Contracts;
 using FruitShop.Web.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -37,6 +37,12 @@ public class AccountController : Controller
             var loginResult = JsonSerializer.Deserialize<LoginResponse>(response.Data, JsonOptions);
             if (loginResult != null && loginResult.Success)
             {
+                if (!string.Equals(loginResult.RoleName, "Customer", StringComparison.OrdinalIgnoreCase))
+                {
+                    ViewBag.Error = "Tài khoản quản trị/nhân viên vui lòng đăng nhập trên ứng dụng quản lý Desktop.";
+                    return View();
+                }
+
                 HttpContext.Session.SetInt32("UserId", loginResult.UserId);
                 HttpContext.Session.SetString("Username", loginResult.Username);
                 HttpContext.Session.SetString("FullName", loginResult.FullName);
