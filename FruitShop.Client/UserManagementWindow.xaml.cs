@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using System.Windows;
 using System.Windows.Controls;
@@ -41,30 +41,25 @@ public partial class UserManagementWindow : Window
 
     private async void AddUserButton_Click(object sender, RoutedEventArgs e)
     {
-        var username = Microsoft.VisualBasic.Interaction.InputBox("Nhập tên đăng nhập:", "Tạo Tài Khoản Mới");
-        if (string.IsNullOrWhiteSpace(username)) return;
-
-        var fullName = Microsoft.VisualBasic.Interaction.InputBox("Nhập họ và tên:", "Tạo Tài Khoản Mới");
-        if (string.IsNullOrWhiteSpace(fullName)) return;
-
-        var password = Microsoft.VisualBasic.Interaction.InputBox("Nhập mật khẩu:", "Tạo Tài Khoản Mới", "admin123");
-        if (string.IsNullOrWhiteSpace(password)) return;
-
-        var roleStr = Microsoft.VisualBasic.Interaction.InputBox("Nhập vai trò (2 = Manager, 3 = Staff, 1 = Admin):", "Phân Quyền Role", "2");
-        if (!int.TryParse(roleStr, out var roleId)) roleId = 2;
-
-        var request = new CreateUserRequest
+        var dialog = new CreateAccountWindow { Owner = this };
+        if (dialog.ShowDialog() == true)
         {
-            Username = username,
-            FullName = fullName,
-            Password = password,
-            RoleId = roleId,
-            BranchId = 1
-        };
+            var request = new CreateUserRequest
+            {
+                Username = dialog.AccountUsername,
+                Password = dialog.AccountPassword,
+                FullName = dialog.AccountFullName,
+                RoleId = dialog.RoleId,
+                BranchId = dialog.BranchId,
+                Email = dialog.Email,
+                Phone = dialog.Phone,
+                Address = dialog.Address
+            };
 
-        var res = await _clientService.CreateUserAsync(request);
-        MessageBox.Show(res.Message, "Thông báo", MessageBoxButton.OK, res.Status == "SUCCESS" ? MessageBoxImage.Information : MessageBoxImage.Warning);
-        await LoadUsersAsync();
+            var res = await _clientService.CreateUserAsync(request);
+            MessageBox.Show(res.Message, "Thông báo", MessageBoxButton.OK, res.Status == "SUCCESS" ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            await LoadUsersAsync();
+        }
     }
 
     private async void ToggleActive_Click(object sender, RoutedEventArgs e)
