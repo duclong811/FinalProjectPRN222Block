@@ -52,9 +52,15 @@ public class ProductListResponse
     public List<ProductDto> Items { get; set; } = new();
 }
 
+public class GetProductsRequest
+{
+    public int? BranchId { get; set; }
+}
+
 public class GetProductsPagedRequest
 {
     public int? CategoryId { get; set; }
+    public int? BranchId { get; set; }
     public string? PriceRange { get; set; }
     public string? Sort { get; set; }
     public int Page { get; set; } = 1;
@@ -84,6 +90,8 @@ public class WebProductDto
 public class WebProductSaleBatchDto
 {
     public int InventoryId { get; set; }
+    public int BranchId { get; set; }
+    public string BranchName { get; set; } = string.Empty;
     public string BatchCode { get; set; } = string.Empty;
     public int RemainingQuantity { get; set; }
     public DateTime ExpiryDate { get; set; }

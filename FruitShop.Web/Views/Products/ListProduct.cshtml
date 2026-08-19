@@ -1,4 +1,4 @@
-﻿@model FruitShop.Web.ViewModels.ProductListViewModel
+@model FruitShop.Web.ViewModels.ProductListViewModel
 
 @{
     ViewData["Title"] = "Bộ Sưu Tập Trái Cây Thượng Hạng";
@@ -150,6 +150,13 @@
         <p class="text-muted mx-auto" style="max-width: 600px; font-size: 0.95rem;">
             Những lô trái cây chất lượng cao nhất được thu hoạch thủ công và chuyển trực tiếp bằng đường hàng không mỗi ngày.
         </p>
+        @if (!string.IsNullOrEmpty(Model.BranchName))
+        {
+            <div class="alert alert-light border border-success d-inline-flex align-items-center gap-2 px-3 py-2 mt-3 rounded-pill shadow-sm" style="background-color: #EBF5EE; font-size: 0.88rem;">
+                <i class="bi bi-geo-alt-fill text-success"></i>
+                <span>Kho chi nhánh: <strong class="text-success">@Model.BranchName</strong> (Chỉ hiển thị các sản phẩm còn hàng tại chi nhánh này)</span>
+            </div>
+        }
     </div>
 </section>
 

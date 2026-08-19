@@ -1,9 +1,15 @@
-﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
+@using FruitShop.Web.Services
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IProductService ProductService
+@inject IShoppingCartService ShoppingCartService
 @{
     var username = HttpContextAccessor.HttpContext?.Session.GetString("Username");
     var fullName = HttpContextAccessor.HttpContext?.Session.GetString("FullName");
-    var cartItemCount = 0; // Will be populated dynamically by cart service if available
+    var selectedBranchId = HttpContextAccessor.HttpContext?.Session.GetInt32("SelectedBranchId");
+    var selectedBranchName = HttpContextAccessor.HttpContext?.Session.GetString("SelectedBranchName");
+    var branches = await ProductService.GetBranchesAsync();
+    var cartItemCount = await ShoppingCartService.GetItemCountAsync(selectedBranchId);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -46,8 +52,7 @@
             background-color: var(--bg-cream);
             border-bottom: 1px solid rgba(197, 168, 128, 0.2);
             font-size: 0.8rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .navbar {
@@ -121,10 +126,44 @@
     </style>
 </head>
 <body>
-    <div class="top-bar py-2 text-center text-muted">
-        <span><i class="bi bi-geo-alt me-1"></i> Dịch vụ Concierge Giao Hàng Tận Nơi 24/7</span>
-        <span class="mx-3">|</span>
-        <span><i class="bi bi-telephone me-1"></i> Hotline Ưu Tiên: 1800 8888</span>
+    <div class="top-bar py-2 border-bottom">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <div class="d-none d-md-flex align-items-center gap-3 text-muted small">
+                <span><i class="bi bi-shield-check text-success me-1"></i> Trái Cây Nhập Khẩu 100% Tuyển Chọn</span>
+                <span>|</span>
+                <span><i class="bi bi-telephone me-1"></i> Hotline: 1800 8888</span>
+            </div>
+            
+            <!-- BRANCH SELECTOR DROPDOWN -->
+            <div class="ms-auto d-flex align-items-center">
+                <span class="text-muted small me-2 d-none d-sm-inline"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Đang xem kho:</span>
+                <div class="dropdown">
+                    <button class="btn btn-sm dropdown-toggle text-dark border px-3 py-1 shadow-sm font-weight-bold" type="button" id="branchSelectDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #FFFFFF; border-color: #275D38 !important; font-size: 0.82rem; border-radius: 6px; font-weight: 500;">
+                        <i class="bi bi-shop text-success me-1"></i>
+                        <span>@(string.IsNullOrEmpty(selectedBranchName) ? "Toàn Bộ Hệ Thống" : selectedBranchName)</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2" aria-labelledby="branchSelectDropdown" style="min-width: 280px; z-index: 1050;">
+                        <li><h6 class="dropdown-header text-uppercase text-muted" style="letter-spacing: 0.05em; font-size: 0.72rem;">Chọn Chi Nhánh Gần Bạn</h6></li>
+                        <li>
+                            <a class="dropdown-item py-2 @(selectedBranchId == null || selectedBranchId == 0 ? "active bg-success text-white" : "")" asp-controller="Home" asp-action="SetBranch" asp-route-branchId="0" asp-route-returnUrl="@($"{Context.Request.Path}{Context.Request.QueryString}")">
+                                <i class="bi bi-buildings me-2"></i> <strong>Toàn bộ hệ thống</strong>
+                                <small class="d-block text-muted ps-4 @(selectedBranchId == null || selectedBranchId == 0 ? "text-white-50" : "")" style="font-size: 0.75rem;">Xem tất cả kho các chi nhánh</small>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        @foreach (var branch in branches)
+                        {
+                            <li>
+                                <a class="dropdown-item py-2 @(selectedBranchId == branch.Id ? "active bg-success text-white" : "")" asp-controller="Home" asp-action="SetBranch" asp-route-branchId="@branch.Id" asp-route-returnUrl="@($"{Context.Request.Path}{Context.Request.QueryString}")">
+                                    <i class="bi bi-geo-alt me-2 text-danger"></i> <strong>@branch.BranchName</strong>
+                                    <small class="d-block text-muted ps-4 @(selectedBranchId == branch.Id ? "text-white-50" : "")" style="font-size: 0.75rem;">@branch.Address</small>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
     <header class="sticky-top shadow-sm">
@@ -150,8 +189,14 @@
 
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                         <li class="nav-item">
-                            <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index" aria-label="Giỏ hàng">
+                            <a class="nav-link position-relative d-inline-flex align-items-center" asp-controller="Cart" asp-action="Index" aria-label="Giỏ hàng">
                                 <i class="bi bi-bag fs-5"></i>
+                                @if (cartItemCount > 0)
+                                {
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success text-white" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                        @cartItemCount
+                                    </span>
+                                }
                             </a>
                         </li>
 

@@ -1,4 +1,4 @@
-﻿using FruitShop.Shared.Contracts;
+using FruitShop.Shared.Contracts;
 using FruitShop.Shared.Helpers;
 using System.Text.Json;
 
@@ -126,7 +126,24 @@ public sealed class RequestHandler
                 case "GET_PRODUCTS":
                 case "PRODUCTS":
                     {
-                        var res = await _productService.GetActiveProductsAsync(cancellationToken);
+                        int? branchId = null;
+                        if (!string.IsNullOrWhiteSpace(request.Data))
+                        {
+                            if (int.TryParse(request.Data, out var bId))
+                            {
+                                branchId = bId > 0 ? bId : null;
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    var reqObj = JsonSerializer.Deserialize<GetProductsRequest>(request.Data, JsonOptions);
+                                    if (reqObj?.BranchId is > 0) branchId = reqObj.BranchId;
+                                }
+                                catch { }
+                            }
+                        }
+                        var res = await _productService.GetActiveProductsAsync(branchId, cancellationToken);
                         response.Status = "SUCCESS";
                         response.Data = JsonSerializer.Serialize(res, JsonOptions);
                     }
@@ -146,7 +163,7 @@ public sealed class RequestHandler
                 case "PRODUCT-DETAIL":
                     {
                         int id = int.TryParse(request.Data, out var parsedId) ? parsedId : 0;
-                        var res = await _productService.GetProductByIdAsync(id, cancellationToken);
+                        var res = await _productService.GetProductByIdAsync(id, null, cancellationToken);
                         if (res is not null)
                         {
                             response.Status = "SUCCESS";
@@ -163,7 +180,7 @@ public sealed class RequestHandler
                 case "GET_WEB_PRODUCT_DETAIL":
                     {
                         int id = int.TryParse(request.Data, out var parsedId) ? parsedId : 0;
-                        var res = await _productService.GetWebProductByIdAsync(id, cancellationToken);
+                        var res = await _productService.GetWebProductByIdAsync(id, null, cancellationToken);
                         if (res is not null)
                         {
                             response.Status = "SUCCESS";
@@ -179,7 +196,7 @@ public sealed class RequestHandler
 
                 case "SEARCH_PRODUCTS":
                     {
-                        var res = await _productService.SearchProductsAsync(request.Data, cancellationToken);
+                        var res = await _productService.SearchProductsAsync(request.Data, null, cancellationToken);
                         response.Status = "SUCCESS";
                         response.Data = JsonSerializer.Serialize(res, JsonOptions);
                     }
@@ -220,7 +237,24 @@ public sealed class RequestHandler
                 case "GET_INVENTORY":
                 case "INVENTORY":
                     {
-                        var res = await _inventoryService.GetInventoryAsync(cancellationToken);
+                        int? branchId = null;
+                        if (!string.IsNullOrWhiteSpace(request.Data))
+                        {
+                            if (int.TryParse(request.Data, out var bId))
+                            {
+                                branchId = bId > 0 ? bId : null;
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    var reqObj = JsonSerializer.Deserialize<GetProductsRequest>(request.Data, JsonOptions);
+                                    if (reqObj?.BranchId is > 0) branchId = reqObj.BranchId;
+                                }
+                                catch { }
+                            }
+                        }
+                        var res = await _inventoryService.GetInventoryAsync(branchId, cancellationToken);
                         response.Status = "SUCCESS";
                         response.Data = JsonSerializer.Serialize(res, JsonOptions);
                     }
@@ -237,7 +271,24 @@ public sealed class RequestHandler
                 case "GET_ORDERS":
                 case "ORDERS":
                     {
-                        var res = await _orderService.GetOrdersAsync(cancellationToken);
+                        int? branchId = null;
+                        if (!string.IsNullOrWhiteSpace(request.Data))
+                        {
+                            if (int.TryParse(request.Data, out var bId))
+                            {
+                                branchId = bId > 0 ? bId : null;
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    var reqObj = JsonSerializer.Deserialize<GetProductsRequest>(request.Data, JsonOptions);
+                                    if (reqObj?.BranchId is > 0) branchId = reqObj.BranchId;
+                                }
+                                catch { }
+                            }
+                        }
+                        var res = await _orderService.GetOrdersAsync(branchId, cancellationToken);
                         response.Status = "SUCCESS";
                         response.Data = JsonSerializer.Serialize(res, JsonOptions);
                     }

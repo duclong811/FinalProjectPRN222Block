@@ -5,12 +5,13 @@
 
 <section class="py-5">
     <div class="container" style="max-width: 700px;">
-        <div class="bg-white border p-5 text-center">
-            <i class="bi bi-check-circle" style="font-size: 3rem; color: var(--accent-green);"></i>
+        <div class="bg-white border p-5 text-center shadow-sm">
+            <i class="bi bi-check-circle" style="font-size: 3.5rem; color: var(--accent-green);"></i>
             <h1 class="display-6 font-serif mt-3">Đặt Hàng Thành Công</h1>
-            <p class="text-muted">Mã đơn hàng của quý khách: <strong>@Model</strong></p>
-            <p class="text-muted">Đơn hàng đang chờ xử lý. Quý khách thanh toán bằng tiền mặt khi nhận hàng.</p>
-            <a asp-controller="Products" asp-action="ListProduct" class="btn btn-luxury mt-2">TIẾP TỤC MUA SẮM</a>
+            <p class="text-muted">Mã đơn hàng của quý khách: <strong class="fs-5 text-dark">@Model</strong></p>
+            <p class="text-muted">Chi nhánh phụ trách xử lý: <strong class="text-success">@(Context.Session.GetString("SelectedBranchName") ?? "Hệ thống FruitShop")</strong></p>
+            <p class="small text-muted">Đơn hàng đang được bộ phận phụ trách chuẩn bị và vận chuyển đến quý khách. Quý khách thanh toán bằng tiền mặt khi nhận hàng.</p>
+            <a asp-controller="Products" asp-action="ListProduct" class="btn btn-luxury mt-3">TIẾP TỤC MUA SẮM</a>
         </div>
     </div>
 </section>

@@ -1,4 +1,4 @@
-﻿using FruitShop.Server.Data;
+using FruitShop.Server.Data;
 using FruitShop.Shared.Contracts;
 using FruitShop.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +14,22 @@ public sealed class OrderService
         _connectionString = connectionString;
     }
 
-    public async Task<OrderListResponse> GetOrdersAsync(CancellationToken cancellationToken = default)
+    public async Task<OrderListResponse> GetOrdersAsync(int? branchId = null, CancellationToken cancellationToken = default)
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
-        var orders = await db.Orders.AsNoTracking()
+        var query = db.Orders.AsNoTracking()
             .Include(o => o.OrderDetails)
             .Include(o => o.Branch)
             .Include(o => o.Staff)
             .Include(o => o.Payments)
+            .AsQueryable();
+
+        if (branchId.HasValue && branchId.Value > 0)
+        {
+            query = query.Where(o => o.BranchId == branchId.Value);
+        }
+
+        var orders = await query
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
 
@@ -155,7 +163,7 @@ public sealed class OrderService
                 if (batch is null)
                 {
                     batch = product.Inventories
-                        .Where(inv => inv.RemainingQuantity >= item.Quantity && inv.ExpiryDate >= today)
+                        .Where(inv => (!order.BranchId.HasValue || inv.BranchId == order.BranchId.Value) && inv.RemainingQuantity >= item.Quantity && inv.ExpiryDate >= today)
                         .OrderBy(inv => inv.ExpiryDate)
                         .ThenBy(inv => inv.ReceivedAt)
                         .FirstOrDefault();

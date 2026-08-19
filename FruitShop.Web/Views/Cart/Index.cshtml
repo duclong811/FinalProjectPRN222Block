@@ -1,58 +1,130 @@
 @model FruitShop.Web.ViewModels.CartViewModel
 @{
-    ViewData["Title"] = "Giỏ hàng";
+    ViewData["Title"] = "Giỏ hàng theo chi nhánh";
 }
 
 <section class="py-5">
     <div class="container">
-        <h1 class="display-6 font-serif mb-4">Giỏ Hàng Của Quý Khách</h1>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom">
+            <div>
+                <h1 class="display-6 font-serif mb-1">Giỏ Hàng Của Quý Khách</h1>
+                <div class="text-muted small">
+                    <i class="bi bi-shop text-success me-1"></i> Kho chi nhánh đang phục vụ: 
+                    <strong class="text-success fs-6">@(Model.CurrentBranchName ?? "Chi nhánh mặc định")</strong>
+                </div>
+            </div>
+            <div class="mt-3 mt-md-0">
+                <a asp-controller="Products" asp-action="ListProduct" class="btn btn-sm btn-outline-luxury">
+                    <i class="bi bi-plus-lg me-1"></i> Mua thêm tại chi nhánh này
+                </a>
+            </div>
+        </div>
 
         @if (TempData["CartMessage"] is string message)
         {
-            <div class="alert alert-info">@message</div>
+            <div class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-info-circle me-2"></i>@message
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- OTHER BRANCH CARTS NOTIFICATION -->
+        @if (Model.OtherBranchCarts != null && Model.OtherBranchCarts.Count > 0)
+        {
+            <div class="alert alert-warning border-warning shadow-sm mb-4">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="bi bi-bag-check-fill text-warning fs-5 mt-1"></i>
+                    <div class="flex-grow-1">
+                        <strong class="d-block text-dark">Quý khách có giỏ hàng đã lưu tại các chi nhánh khác:</strong>
+                        <div class="d-flex flex-wrap gap-3 mt-2">
+                            @foreach (var otherCart in Model.OtherBranchCarts)
+                            {
+                                <div class="bg-white border rounded px-3 py-2 d-flex align-items-center gap-3">
+                                    <div>
+                                        <div class="small fw-semibold text-dark"><i class="bi bi-geo-alt text-danger me-1"></i>@otherCart.BranchName</div>
+                                        <div class="small text-muted">@otherCart.ItemCount sản phẩm · @otherCart.TotalAmount.ToString("N0") ₫</div>
+                                    </div>
+                                    <a asp-controller="Home" asp-action="SetBranch" asp-route-branchId="@otherCart.BranchId" asp-route-returnUrl="/Cart" class="btn btn-sm btn-outline-success">
+                                        Chuyển sang xem
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
 
         @if (Model.IsEmpty)
         {
-            <div class="bg-white border p-5 text-center">
-                <p class="text-muted mb-4">Giỏ hàng hiện chưa có sản phẩm.</p>
-                <a asp-controller="Products" asp-action="ListProduct" class="btn btn-luxury">XEM SẢN PHẨM</a>
+            <div class="bg-white border p-5 text-center shadow-sm">
+                <i class="bi bi-cart-x text-muted" style="font-size: 3rem;"></i>
+                <h2 class="h5 font-serif mt-3">Giỏ hàng tại chi nhánh này đang trống</h2>
+                <p class="text-muted mb-4">Quý khách chưa thêm sản phẩm nào từ kho @(Model.CurrentBranchName ?? "chi nhánh này").</p>
+                <a asp-controller="Products" asp-action="ListProduct" class="btn btn-luxury">XEM SẢN PHẨM SẴN CÓ</a>
             </div>
         }
         else
         {
             <div class="row g-4">
                 <div class="col-lg-8">
-                    <div class="bg-white border">
+                    <div class="bg-white border shadow-sm">
+                        <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-uppercase text-muted" style="letter-spacing: 0.05em;">
+                                Sản phẩm từ kho: @(Model.CurrentBranchName)
+                            </span>
+                            <span class="badge bg-success text-white">@Model.ItemCount món</span>
+                        </div>
                         @foreach (var item in Model.Items)
                         {
                             <div class="p-3 border-bottom d-flex gap-3 align-items-center">
-                                <img src="@(string.IsNullOrWhiteSpace(item.ImageUrl) ? "https://placehold.co/120x100?text=Fruit" : item.ImageUrl)" alt="@item.Name" style="width: 100px; height: 85px; object-fit: cover;">
+                                <img src="@(string.IsNullOrWhiteSpace(item.ImageUrl) ? "https://placehold.co/120x100?text=Fruit" : item.ImageUrl)" alt="@item.Name" style="width: 90px; height: 80px; object-fit: cover;" class="rounded border">
                                 <div class="flex-grow-1">
-                                    <h2 class="h5 font-serif mb-1">@item.Name</h2>
-                                    <div class="small text-muted">Lô @item.BatchCode · HSD @item.ExpiryDate.ToString("dd/MM/yyyy")</div>
-                                    <div class="small text-muted">@item.UnitPrice.ToString("N0") ₫ / @item.Unit</div>
+                                    <h2 class="h6 font-serif mb-1">@item.Name</h2>
+                                    <div class="small text-muted"><i class="bi bi-box-seam me-1"></i>Lô: <strong>@item.BatchCode</strong> · HSD: @item.ExpiryDate.ToString("dd/MM/yyyy")</div>
+                                    <div class="small text-success fw-semibold mt-1">@item.UnitPrice.ToString("N0") ₫ / @item.Unit</div>
                                 </div>
                                 <form asp-action="Update" method="post" class="d-flex align-items-center gap-2">
                                     <input type="hidden" name="productId" value="@item.ProductId" />
                                     <input type="hidden" name="inventoryId" value="@item.InventoryId" />
-                                    <input class="form-control" type="number" name="quantity" value="@item.Quantity" min="1" max="@item.AvailableStock" style="width: 75px;">
-                                    <button class="btn btn-outline-luxury py-2 px-3" type="submit" title="Cập nhật"><i class="bi bi-arrow-repeat"></i></button>
+                                    <input class="form-control form-control-sm text-center" type="number" name="quantity" value="@item.Quantity" min="1" max="@item.AvailableStock" style="width: 70px;">
+                                    <button class="btn btn-outline-luxury py-1 px-2 btn-sm" type="submit" title="Cập nhật"><i class="bi bi-arrow-repeat"></i></button>
                                 </form>
                                 <div class="text-end" style="min-width: 110px;">
-                                    <div class="fw-semibold">@item.LineTotal.ToString("N0") ₫</div>
-                                    <form asp-action="Remove" method="post" class="mt-2"><input type="hidden" name="productId" value="@item.ProductId" /><input type="hidden" name="inventoryId" value="@item.InventoryId" /><button class="btn btn-link text-danger p-0 small" type="submit">Xóa</button></form>
+                                    <div class="fw-bold font-serif text-dark">@item.LineTotal.ToString("N0") ₫</div>
+                                    <form asp-action="Remove" method="post" class="mt-1">
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <input type="hidden" name="inventoryId" value="@item.InventoryId" />
+                                        <button class="btn btn-link text-danger p-0 small text-decoration-none" type="submit">
+                                            <i class="bi bi-trash me-1"></i>Xóa
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         }
                     </div>
                 </div>
                 <div class="col-lg-4">
-                    <div class="bg-white border p-4">
-                        <h2 class="h4 font-serif border-bottom pb-3">Tóm Tắt Đơn Hàng</h2>
-                        <div class="d-flex justify-content-between mt-3"><span>@Model.ItemCount sản phẩm</span><strong>@Model.TotalAmount.ToString("N0") ₫</strong></div>
-                        <a asp-action="Checkout" class="btn btn-luxury w-100 mt-4">TIẾN HÀNH THANH TOÁN</a>
-                        <a asp-controller="Products" asp-action="ListProduct" class="btn btn-outline-luxury w-100 mt-2">TIẾP TỤC MUA SẮM</a>
+                    <div class="bg-white border p-4 shadow-sm">
+                        <h2 class="h5 font-serif border-bottom pb-3">Tóm Tắt Đơn Hàng</h2>
+                        <div class="d-flex justify-content-between mt-3 small text-muted">
+                            <span>Chi nhánh phục vụ:</span>
+                            <strong class="text-success">@(Model.CurrentBranchName)</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Tổng số lượng:</span>
+                            <strong>@Model.ItemCount @(Model.ItemCount > 1 ? "món" : "món")</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-3 mt-3">
+                            <span class="fs-6">Thành tiền:</span>
+                            <strong class="fs-5 text-success font-serif">@Model.TotalAmount.ToString("N0") ₫</strong>
+                        </div>
+                        <a asp-action="Checkout" class="btn btn-luxury w-100 mt-4 py-2 text-uppercase">
+                            TIẾN HÀNH THANH TOÁN (COD)
+                        </a>
+                        <a asp-controller="Products" asp-action="ListProduct" class="btn btn-outline-luxury w-100 mt-2 py-2">
+                            TIẾP TỤC MUA SẮM
+                        </a>
                     </div>
                 </div>
             </div>

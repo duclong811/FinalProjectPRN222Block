@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using System.Windows;
 
@@ -10,11 +10,14 @@ public partial class UpdateStockWindow : Window
     private List<ProductDto> _products = new();
     private List<BranchDto> _branches = new();
     private readonly int? _preselectedProductId;
+    private readonly int? _preselectedBranchId;
 
-    public UpdateStockWindow(int? productId = null)
+    public UpdateStockWindow(int? productId = null, int? branchId = null)
     {
         InitializeComponent();
         _preselectedProductId = productId;
+        _preselectedBranchId = branchId;
+        BatchCodeTextBox.Text = $"BATCH-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
         ExpiryDatePicker.SelectedDate = DateTime.Today.AddDays(30);
         Loaded += async (_, _) => await LoadDataAsync();
     }
@@ -42,7 +45,13 @@ public partial class UpdateStockWindow : Window
             {
                 _branches = branchRes.Items;
                 BranchComboBox.ItemsSource = _branches;
-                if (_branches.Count > 0) BranchComboBox.SelectedIndex = 0;
+                if (_branches.Count > 0)
+                {
+                    if (_preselectedBranchId.HasValue && _branches.Any(b => b.Id == _preselectedBranchId.Value))
+                        BranchComboBox.SelectedValue = _preselectedBranchId.Value;
+                    else
+                        BranchComboBox.SelectedIndex = 0;
+                }
             }
         }
         catch (Exception ex)

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Net.Sockets;
 using System.Text.Json;
 using FruitShop.Shared.Contracts;
@@ -38,9 +38,9 @@ public sealed class TcpClientService
             ?? new LoginResponse { Success = false, Message = "Lỗi giải mã dữ liệu đăng ký." };
     }
 
-    public async Task<ProductListResponse> GetProductsAsync()
+    public async Task<ProductListResponse> GetProductsAsync(int? branchId = null)
     {
-        var response = await SendRequestAsync("GET_PRODUCTS");
+        var response = await SendRequestAsync("GET_PRODUCTS", branchId?.ToString() ?? string.Empty);
         if (response.Status != "SUCCESS" || string.IsNullOrEmpty(response.Data))
             return new ProductListResponse { Success = false, Message = response.Message };
 
@@ -48,14 +48,14 @@ public sealed class TcpClientService
             ?? new ProductListResponse { Success = false, Message = "Lỗi giải mã danh sách sản phẩm." };
     }
 
-    public async Task<ProductDto?> GetProductByIdAsync(int productId)
+    public async Task<ProductDto?> GetProductByIdAsync(int productId, int? branchId = null)
     {
         var response = await SendRequestAsync("GET_PRODUCT_BY_ID", productId.ToString());
         if (response.Status != "SUCCESS" || string.IsNullOrEmpty(response.Data)) return null;
         return JsonSerializer.Deserialize<ProductDto>(response.Data, JsonOptions);
     }
 
-    public async Task<ProductDto?> GetProductDetailAsync(int productId) => await GetProductByIdAsync(productId);
+    public async Task<ProductDto?> GetProductDetailAsync(int productId, int? branchId = null) => await GetProductByIdAsync(productId, branchId);
 
     public async Task<CategoryListResponse> GetCategoriesAsync()
     {
@@ -67,9 +67,9 @@ public sealed class TcpClientService
             ?? new CategoryListResponse { Success = false, Message = "Lỗi giải mã danh mục." };
     }
 
-    public async Task<InventoryListResponse> GetInventoryAsync()
+    public async Task<InventoryListResponse> GetInventoryAsync(int? branchId = null)
     {
-        var response = await SendRequestAsync("GET_INVENTORY");
+        var response = await SendRequestAsync("GET_INVENTORY", branchId?.ToString() ?? string.Empty);
         if (response.Status != "SUCCESS" || string.IsNullOrEmpty(response.Data))
             return new InventoryListResponse { Success = false, Message = response.Message };
 
@@ -77,9 +77,9 @@ public sealed class TcpClientService
             ?? new InventoryListResponse { Success = false, Message = "Lỗi giải mã kho hàng." };
     }
 
-    public async Task<OrderListResponse> GetOrdersAsync()
+    public async Task<OrderListResponse> GetOrdersAsync(int? branchId = null)
     {
-        var response = await SendRequestAsync("GET_ORDERS");
+        var response = await SendRequestAsync("GET_ORDERS", branchId?.ToString() ?? string.Empty);
         if (response.Status != "SUCCESS" || string.IsNullOrEmpty(response.Data))
             return new OrderListResponse { Success = false, Message = response.Message };
 

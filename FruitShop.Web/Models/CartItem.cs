@@ -4,6 +4,8 @@ public sealed class CartItem
 {
     public int ProductId { get; set; }
     public int InventoryId { get; set; }
+    public int BranchId { get; set; }
+    public string BranchName { get; set; } = string.Empty;
     public string BatchCode { get; set; } = string.Empty;
     public DateTime ExpiryDate { get; set; }
     public string Name { get; set; } = string.Empty;

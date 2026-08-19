@@ -14,13 +14,21 @@ public sealed class InventoryService
         _connectionString = connectionString;
     }
 
-    public async Task<InventoryListResponse> GetInventoryAsync(CancellationToken cancellationToken = default)
+    public async Task<InventoryListResponse> GetInventoryAsync(int? branchId = null, CancellationToken cancellationToken = default)
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
-        var items = await db.Inventories.AsNoTracking()
+        var query = db.Inventories.AsNoTracking()
             .Include(i => i.Product)
                 .ThenInclude(p => p.Category)
             .Include(i => i.Branch)
+            .AsQueryable();
+
+        if (branchId.HasValue && branchId.Value > 0)
+        {
+            query = query.Where(i => i.BranchId == branchId.Value);
+        }
+
+        var items = await query
             .OrderByDescending(i => i.ReceivedAt)
             .Select(i => new InventoryDto
             {
