@@ -1,4 +1,4 @@
-﻿using FruitShop.Server.Data;
+using FruitShop.Server.Data;
 using FruitShop.Shared.Contracts;
 using FruitShop.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +19,7 @@ public sealed class InventoryService
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         var items = await db.Inventories.AsNoTracking()
             .Include(i => i.Product)
+                .ThenInclude(p => p.Category)
             .Include(i => i.Branch)
             .OrderByDescending(i => i.ReceivedAt)
             .Select(i => new InventoryDto
@@ -26,6 +27,9 @@ public sealed class InventoryService
                 Id = i.Id,
                 ProductId = i.ProductId,
                 ProductName = i.Product.Name,
+                CategoryName = i.Product.Category != null ? i.Product.Category.Name : string.Empty,
+                Unit = i.Product.Unit,
+                Price = i.Product.Price,
                 BranchId = i.BranchId,
                 BranchName = i.Branch.BranchName,
                 BatchCode = i.BatchCode,

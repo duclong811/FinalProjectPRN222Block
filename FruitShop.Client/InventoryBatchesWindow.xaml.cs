@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using System.Windows;
 
@@ -25,6 +25,9 @@ public partial class InventoryBatchesWindow : Window
             {
                 var batches = response.Items.Where(i => i.ProductId == _productId).ToList();
                 BatchesDataGrid.ItemsSource = batches;
+                var productName = batches.FirstOrDefault()?.ProductName;
+                TitleTextBlock.Text = !string.IsNullOrEmpty(productName) ? $"Lịch sử nhập kho - {productName}" : "Lịch sử nhập kho";
+                StatusTextBlock.Text = $"Tìm thấy {batches.Count} lô hàng cho sản phẩm này.";
             }
         }
         catch (Exception ex)

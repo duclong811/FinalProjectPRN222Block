@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,18 +22,30 @@ public partial class ExpiryManagementWindow : Window
             var response = await _clientService.GetInventoryAsync();
             if (response.Success)
             {
-                var nearExpiry = response.Items.Where(i => i.ExpiryDate > DateTime.Now && i.ExpiryDate <= DateTime.Now.AddDays(30)).ToList();
-                var expired = response.Items.Where(i => i.ExpiryDate <= DateTime.Now).ToList();
+                var today = DateTime.Today;
+                var nearExpiry = response.Items
+                    .Where(i => i.ExpiryDate.Date >= today && i.ExpiryDate.Date <= today.AddDays(2) && i.RemainingQuantity > 0)
+                    .OrderBy(i => i.ExpiryDate)
+                    .ToList();
+
+                var expired = response.Items
+                    .Where(i => i.ExpiryDate.Date < today && i.RemainingQuantity > 0)
+                    .OrderBy(i => i.ExpiryDate)
+                    .ToList();
 
                 ExpiringSoonDataGrid.ItemsSource = nearExpiry;
                 ExpiredDataGrid.ItemsSource = expired;
 
-                StatusTextBlock.Text = $"Near expiry: {nearExpiry.Count} batches | Expired: {expired.Count} batches";
+                StatusTextBlock.Text = $"Sắp hết hạn (0-2 ngày): {nearExpiry.Count} lô | Đã hết hạn: {expired.Count} lô";
+            }
+            else
+            {
+                StatusTextBlock.Text = response.Message;
             }
         }
         catch (Exception ex)
         {
-            StatusTextBlock.Text = $"Error: {ex.Message}";
+            StatusTextBlock.Text = $"Lỗi: {ex.Message}";
         }
     }
 
