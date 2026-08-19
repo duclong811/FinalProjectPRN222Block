@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using FruitShop.Shared.Contracts;
 using FruitShop.Web.Models;
 using FruitShop.Web.ViewModels;
@@ -8,7 +8,6 @@ namespace FruitShop.Web.Services;
 
 public sealed class ShoppingCartService : IShoppingCartService
 {
-    private const string SessionKey = "ShoppingCart";
     private readonly TcpClientService _tcpClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
@@ -19,6 +18,14 @@ public sealed class ShoppingCartService : IShoppingCartService
         _httpContextAccessor = httpContextAccessor;
     }
 
+    private int GetActiveBranchId()
+    {
+        var branchId = _httpContextAccessor.HttpContext?.Session.GetInt32("SelectedBranchId");
+        return (branchId.HasValue && branchId.Value > 0) ? branchId.Value : 1;
+    }
+
+    private string GetSessionKey(int branchId) => $"ShoppingCart_Branch_{branchId}";
+
     public async Task<bool> AddAsync(int productId, int inventoryId, int quantity)
     {
         var product = await GetWebProductByIdAsync(productId);
@@ -26,8 +33,11 @@ public sealed class ShoppingCartService : IShoppingCartService
         if (product is null || batch is null)
             return false;
 
-        var cart = GetItems();
-        var item = cart.SingleOrDefault(cartItem => cartItem.ProductId == productId);
+        int branchId = batch.BranchId > 0 ? batch.BranchId : GetActiveBranchId();
+        string branchName = !string.IsNullOrEmpty(batch.BranchName) ? batch.BranchName : $"Chi nhánh #{branchId}";
+
+        var cart = GetItems(branchId);
+        var item = cart.SingleOrDefault(cartItem => cartItem.ProductId == productId && cartItem.InventoryId == inventoryId);
         if (item is null)
         {
             cart.Add(new CartItem
@@ -35,6 +45,8 @@ public sealed class ShoppingCartService : IShoppingCartService
                 ProductId = product.Id,
                 Name = product.Name,
                 InventoryId = batch.InventoryId,
+                BranchId = branchId,
+                BranchName = branchName,
                 BatchCode = batch.BatchCode,
                 ExpiryDate = batch.ExpiryDate,
                 UnitPrice = batch.SalePrice,
@@ -46,28 +58,60 @@ public sealed class ShoppingCartService : IShoppingCartService
         }
         else
         {
-            item.InventoryId = batch.InventoryId;
             item.BatchCode = batch.BatchCode;
             item.ExpiryDate = batch.ExpiryDate;
             item.UnitPrice = batch.SalePrice;
             item.AvailableStock = batch.RemainingQuantity;
-            item.Quantity = Math.Min(Math.Max(1, quantity), batch.RemainingQuantity);
+            item.Quantity = Math.Min(item.Quantity + quantity, batch.RemainingQuantity);
         }
 
-        SaveItems(cart);
+        SaveItems(branchId, cart);
         return true;
     }
 
-    public Task<CartViewModel> GetCartAsync()
+    public async Task<CartViewModel> GetCartAsync(int? branchId = null)
     {
-        IReadOnlyList<CartItem> items = GetItems();
-        return Task.FromResult(new CartViewModel { Items = items });
+        int targetBranchId = (branchId.HasValue && branchId.Value > 0) ? branchId.Value : GetActiveBranchId();
+        var items = GetItems(targetBranchId);
+
+        var branches = await GetBranchesAsync();
+        var currentBranch = branches.FirstOrDefault(b => b.Id == targetBranchId);
+        string currentBranchName = currentBranch?.BranchName ?? $"Chi nhánh #{targetBranchId}";
+
+        // Collect other branches that have items in their carts
+        var otherBranchCarts = new List<BranchCartSummary>();
+        foreach (var b in branches)
+        {
+            if (b.Id != targetBranchId)
+            {
+                var otherItems = GetItems(b.Id);
+                if (otherItems.Count > 0)
+                {
+                    otherBranchCarts.Add(new BranchCartSummary
+                    {
+                        BranchId = b.Id,
+                        BranchName = b.BranchName,
+                        ItemCount = otherItems.Sum(i => i.Quantity),
+                        TotalAmount = otherItems.Sum(i => i.LineTotal)
+                    });
+                }
+            }
+        }
+
+        return new CartViewModel
+        {
+            Items = items,
+            CurrentBranchId = targetBranchId,
+            CurrentBranchName = currentBranchName,
+            OtherBranchCarts = otherBranchCarts
+        };
     }
 
-    public async Task UpdateQuantityAsync(int productId, int inventoryId, int quantity)
+    public async Task UpdateQuantityAsync(int productId, int inventoryId, int quantity, int? branchId = null)
     {
-        var cart = GetItems();
-        var item = cart.SingleOrDefault(cartItem => cartItem.ProductId == productId);
+        int targetBranchId = (branchId.HasValue && branchId.Value > 0) ? branchId.Value : GetActiveBranchId();
+        var cart = GetItems(targetBranchId);
+        var item = cart.SingleOrDefault(cartItem => cartItem.ProductId == productId && cartItem.InventoryId == inventoryId);
         if (item is not null)
         {
             if (quantity <= 0)
@@ -79,7 +123,6 @@ public sealed class ShoppingCartService : IShoppingCartService
                 if (batch is null) cart.Remove(item);
                 else
                 {
-                    item.InventoryId = batch.InventoryId;
                     item.BatchCode = batch.BatchCode;
                     item.ExpiryDate = batch.ExpiryDate;
                     item.UnitPrice = batch.SalePrice;
@@ -88,25 +131,31 @@ public sealed class ShoppingCartService : IShoppingCartService
                 }
             }
 
-            SaveItems(cart);
+            SaveItems(targetBranchId, cart);
         }
     }
 
-    public Task RemoveAsync(int productId, int inventoryId)
+    public Task RemoveAsync(int productId, int inventoryId, int? branchId = null)
     {
-        var cart = GetItems();
+        int targetBranchId = (branchId.HasValue && branchId.Value > 0) ? branchId.Value : GetActiveBranchId();
+        var cart = GetItems(targetBranchId);
         cart.RemoveAll(item => item.ProductId == productId && item.InventoryId == inventoryId);
-        SaveItems(cart);
+        SaveItems(targetBranchId, cart);
         return Task.CompletedTask;
     }
 
-    public Task ClearAsync()
+    public Task ClearAsync(int? branchId = null)
     {
-        _httpContextAccessor.HttpContext?.Session.Remove(SessionKey);
+        int targetBranchId = (branchId.HasValue && branchId.Value > 0) ? branchId.Value : GetActiveBranchId();
+        _httpContextAccessor.HttpContext?.Session.Remove(GetSessionKey(targetBranchId));
         return Task.CompletedTask;
     }
 
-    public Task<int> GetItemCountAsync() => Task.FromResult(GetItems().Sum(item => item.Quantity));
+    public Task<int> GetItemCountAsync(int? branchId = null)
+    {
+        int targetBranchId = (branchId.HasValue && branchId.Value > 0) ? branchId.Value : GetActiveBranchId();
+        return Task.FromResult(GetItems(targetBranchId).Sum(item => item.Quantity));
+    }
 
     private async Task<WebProductDto?> GetWebProductByIdAsync(int productId)
     {
@@ -118,16 +167,27 @@ public sealed class ShoppingCartService : IShoppingCartService
         return null;
     }
 
-    private List<CartItem> GetItems()
+    private async Task<IReadOnlyList<BranchDto>> GetBranchesAsync()
     {
-        var json = _httpContextAccessor.HttpContext?.Session.GetString(SessionKey);
+        var response = await _tcpClient.SendRequestAsync("GET_BRANCHES");
+        if (response.Status == "SUCCESS" && !string.IsNullOrEmpty(response.Data))
+        {
+            var result = JsonSerializer.Deserialize<BranchListResponse>(response.Data, JsonOptions);
+            return result?.Items ?? [];
+        }
+        return [];
+    }
+
+    private List<CartItem> GetItems(int branchId)
+    {
+        var json = _httpContextAccessor.HttpContext?.Session.GetString(GetSessionKey(branchId));
         return string.IsNullOrWhiteSpace(json)
             ? []
             : JsonSerializer.Deserialize<List<CartItem>>(json) ?? [];
     }
 
-    private void SaveItems(List<CartItem> items)
+    private void SaveItems(int branchId, List<CartItem> items)
     {
-        _httpContextAccessor.HttpContext?.Session.SetString(SessionKey, JsonSerializer.Serialize(items));
+        _httpContextAccessor.HttpContext?.Session.SetString(GetSessionKey(branchId), JsonSerializer.Serialize(items));
     }
 }

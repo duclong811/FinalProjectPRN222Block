@@ -1,4 +1,4 @@
-﻿using FruitShop.Shared.Contracts;
+using FruitShop.Shared.Contracts;
 
 namespace FruitShop.Web.ViewModels;
 
@@ -11,6 +11,8 @@ public sealed class ProductListViewModel
     public required int PageSize { get; init; }
     public required int TotalPages { get; init; }
     public int? CategoryId { get; init; }
+    public int? BranchId { get; init; }
+    public string? BranchName { get; init; }
     public string? PriceRange { get; init; }
     public string? Sort { get; init; }
 }

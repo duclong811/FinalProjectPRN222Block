@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using FruitShop.Shared.Contracts;
 using FruitShop.Web.Models;
 using FruitShop.Web.ViewModels;
@@ -26,11 +26,23 @@ public sealed class ProductService : IProductService
         return [];
     }
 
+    public async Task<IReadOnlyList<BranchDto>> GetBranchesAsync()
+    {
+        var response = await _tcpClient.SendRequestAsync("GET_BRANCHES");
+        if (response.Status == "SUCCESS" && !string.IsNullOrEmpty(response.Data))
+        {
+            var result = JsonSerializer.Deserialize<BranchListResponse>(response.Data, JsonOptions);
+            return result?.Items ?? [];
+        }
+        return [];
+    }
+
     public async Task<ProductListViewModel> GetProductListAsync(ProductListRequest request)
     {
         var reqDto = new GetProductsPagedRequest
         {
             CategoryId = request.CategoryId,
+            BranchId = request.BranchId,
             PriceRange = request.PriceRange,
             Sort = request.Sort,
             Page = request.Page,
@@ -52,6 +64,7 @@ public sealed class ProductService : IProductService
                     PageSize = pagedRes.PageSize,
                     TotalPages = pagedRes.TotalPages,
                     CategoryId = request.CategoryId,
+                    BranchId = request.BranchId,
                     PriceRange = request.PriceRange,
                     Sort = request.Sort
                 };
@@ -67,6 +80,7 @@ public sealed class ProductService : IProductService
             PageSize = request.PageSize,
             TotalPages = 0,
             CategoryId = request.CategoryId,
+            BranchId = request.BranchId,
             PriceRange = request.PriceRange,
             Sort = request.Sort
         };

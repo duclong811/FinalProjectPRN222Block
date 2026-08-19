@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using FruitShop.Shared.Contracts;
 using FruitShop.Web.ViewModels;
@@ -35,10 +35,17 @@ public sealed class OrderService : IOrderService
             return null;
 
         int? customerId = _httpContextAccessor.HttpContext?.Session.GetInt32("UserId");
+        int? selectedBranchId = _httpContextAccessor.HttpContext?.Session.GetInt32("SelectedBranchId");
+        if (selectedBranchId == 0) selectedBranchId = null;
+        if (!selectedBranchId.HasValue)
+        {
+            selectedBranchId = 1; // Default to branch 1
+        }
 
         var request = new CreateOrderRequest
         {
             CustomerId = customerId,
+            BranchId = selectedBranchId,
             CustomerName = checkout.CustomerName.Trim(),
             CustomerPhone = checkout.CustomerPhone.Trim(),
             CustomerEmail = string.IsNullOrWhiteSpace(checkout.CustomerEmail) ? null : checkout.CustomerEmail.Trim(),

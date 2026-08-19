@@ -1,4 +1,4 @@
-﻿using FruitShop.Server.Data;
+using FruitShop.Server.Data;
 using FruitShop.Shared.Contracts;
 using FruitShop.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -35,11 +35,12 @@ public sealed class ProductManagementService
         return new CategoryListResponse { Success = true, Items = items };
     }
 
-    public async Task<ProductListResponse> GetActiveProductsAsync(CancellationToken cancellationToken = default)
+    public async Task<ProductListResponse> GetActiveProductsAsync(int? branchId = null, CancellationToken cancellationToken = default)
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         var items = await db.Products.AsNoTracking()
             .Include(p => p.Category)
+            .Include(p => p.Inventories)
             .Where(p => p.IsActive)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new ProductDto
@@ -50,7 +51,9 @@ public sealed class ProductManagementService
                 Name = p.Name,
                 Description = p.Description,
                 Price = p.Price,
-                StockQuantity = p.StockQuantity,
+                StockQuantity = branchId.HasValue && branchId.Value > 0
+                    ? p.Inventories.Where(i => i.BranchId == branchId.Value && i.RemainingQuantity > 0).Sum(i => (int?)i.RemainingQuantity) ?? 0
+                    : p.Inventories.Where(i => i.RemainingQuantity > 0).Sum(i => (int?)i.RemainingQuantity) ?? 0,
                 Unit = p.Unit,
                 ImageUrl = p.ImageUrl,
                 MinStockThreshold = p.MinStockThreshold,
@@ -80,8 +83,8 @@ public sealed class ProductManagementService
 
         var query = db.Products.AsNoTracking()
             .Include(p => p.Category)
-            .Include(p => p.Inventories)
-            .Where(p => p.IsActive && p.Inventories.Any(inv => inv.RemainingQuantity > 0 && inv.ExpiryDate >= today));
+            .Include(p => p.Inventories).ThenInclude(i => i.Branch)
+            .Where(p => p.IsActive && p.Inventories.Any(inv => (!request.BranchId.HasValue || inv.BranchId == request.BranchId.Value) && inv.RemainingQuantity > 0 && inv.ExpiryDate >= today));
 
         if (request.CategoryId.HasValue)
             query = query.Where(p => p.CategoryId == request.CategoryId.Value);
@@ -113,13 +116,15 @@ public sealed class ProductManagementService
         foreach (var p in rawProducts)
         {
             var validBatches = p.Inventories
-                .Where(inv => inv.RemainingQuantity > 0 && inv.ExpiryDate >= today)
+                .Where(inv => (!request.BranchId.HasValue || inv.BranchId == request.BranchId.Value) && inv.RemainingQuantity > 0 && inv.ExpiryDate >= today)
                 .OrderBy(inv => inv.ExpiryDate)
                 .ThenBy(inv => inv.ReceivedAt)
                 .ThenBy(inv => inv.Id)
                 .Select(inv => new WebProductSaleBatchDto
                 {
                     InventoryId = inv.Id,
+                    BranchId = inv.BranchId,
+                    BranchName = inv.Branch != null ? inv.Branch.BranchName : string.Empty,
                     BatchCode = inv.BatchCode,
                     RemainingQuantity = inv.RemainingQuantity,
                     ExpiryDate = inv.ExpiryDate,
@@ -140,7 +145,7 @@ public sealed class ProductManagementService
                 Description = p.Description,
                 Price = p.Price,
                 SalePrice = firstBatch.SalePrice,
-                StockQuantity = p.StockQuantity,
+                StockQuantity = validBatches.Sum(b => b.RemainingQuantity),
                 Unit = p.Unit,
                 ImageUrl = p.ImageUrl,
                 IsActive = p.IsActive,
@@ -164,25 +169,27 @@ public sealed class ProductManagementService
         };
     }
 
-    public async Task<WebProductDto?> GetWebProductByIdAsync(int productId, CancellationToken cancellationToken = default)
+    public async Task<WebProductDto?> GetWebProductByIdAsync(int productId, int? branchId = null, CancellationToken cancellationToken = default)
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         var today = DateTime.Today;
         var p = await db.Products.AsNoTracking()
             .Include(p => p.Category)
-            .Include(p => p.Inventories)
+            .Include(p => p.Inventories).ThenInclude(i => i.Branch)
             .FirstOrDefaultAsync(p => p.Id == productId && p.IsActive, cancellationToken);
 
         if (p is null) return null;
 
         var validBatches = p.Inventories
-            .Where(inv => inv.RemainingQuantity > 0 && inv.ExpiryDate >= today)
+            .Where(inv => (!branchId.HasValue || inv.BranchId == branchId.Value) && inv.RemainingQuantity > 0 && inv.ExpiryDate >= today)
             .OrderBy(inv => inv.ExpiryDate)
             .ThenBy(inv => inv.ReceivedAt)
             .ThenBy(inv => inv.Id)
             .Select(inv => new WebProductSaleBatchDto
             {
                 InventoryId = inv.Id,
+                BranchId = inv.BranchId,
+                BranchName = inv.Branch != null ? inv.Branch.BranchName : string.Empty,
                 BatchCode = inv.BatchCode,
                 RemainingQuantity = inv.RemainingQuantity,
                 ExpiryDate = inv.ExpiryDate,
@@ -203,7 +210,7 @@ public sealed class ProductManagementService
             Description = p.Description,
             Price = p.Price,
             SalePrice = firstBatch.SalePrice,
-            StockQuantity = p.StockQuantity,
+            StockQuantity = validBatches.Sum(b => b.RemainingQuantity),
             Unit = p.Unit,
             ImageUrl = p.ImageUrl,
             IsActive = p.IsActive,
@@ -215,11 +222,12 @@ public sealed class ProductManagementService
         };
     }
 
-    public async Task<ProductDto?> GetProductByIdAsync(int productId, CancellationToken cancellationToken = default)
+    public async Task<ProductDto?> GetProductByIdAsync(int productId, int? branchId = null, CancellationToken cancellationToken = default)
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         var p = await db.Products.AsNoTracking()
             .Include(p => p.Category)
+            .Include(p => p.Inventories)
             .FirstOrDefaultAsync(p => p.Id == productId && p.IsActive, cancellationToken);
 
         if (p is null) return null;
@@ -231,7 +239,9 @@ public sealed class ProductManagementService
             Name = p.Name,
             Description = p.Description,
             Price = p.Price,
-            StockQuantity = p.StockQuantity,
+            StockQuantity = branchId.HasValue && branchId.Value > 0
+                ? p.Inventories.Where(i => i.BranchId == branchId.Value && i.RemainingQuantity > 0).Sum(i => (int?)i.RemainingQuantity) ?? 0
+                : p.Inventories.Where(i => i.RemainingQuantity > 0).Sum(i => (int?)i.RemainingQuantity) ?? 0,
             Unit = p.Unit,
             ImageUrl = p.ImageUrl,
             MinStockThreshold = p.MinStockThreshold,
@@ -240,12 +250,13 @@ public sealed class ProductManagementService
         };
     }
 
-    public async Task<ProductListResponse> SearchProductsAsync(string keyword, CancellationToken cancellationToken = default)
+    public async Task<ProductListResponse> SearchProductsAsync(string keyword, int? branchId = null, CancellationToken cancellationToken = default)
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         keyword = keyword?.Trim() ?? string.Empty;
         var items = await db.Products.AsNoTracking()
             .Include(p => p.Category)
+            .Include(p => p.Inventories)
             .Where(p => p.IsActive && p.Name.Contains(keyword))
             .Select(p => new ProductDto
             {
@@ -255,7 +266,9 @@ public sealed class ProductManagementService
                 Name = p.Name,
                 Description = p.Description,
                 Price = p.Price,
-                StockQuantity = p.StockQuantity,
+                StockQuantity = branchId.HasValue && branchId.Value > 0
+                    ? p.Inventories.Where(i => i.BranchId == branchId.Value && i.RemainingQuantity > 0).Sum(i => (int?)i.RemainingQuantity) ?? 0
+                    : p.Inventories.Where(i => i.RemainingQuantity > 0).Sum(i => (int?)i.RemainingQuantity) ?? 0,
                 Unit = p.Unit,
                 ImageUrl = p.ImageUrl,
                 MinStockThreshold = p.MinStockThreshold,
