@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using System.Windows;
 
@@ -47,6 +47,15 @@ public partial class BranchManagementWindow : Window
         if (string.IsNullOrWhiteSpace(address)) return;
 
         var phone = Microsoft.VisualBasic.Interaction.InputBox("Nhập số điện thoại:", "Tạo Chi Nhánh Mới");
+        if (!string.IsNullOrWhiteSpace(phone))
+        {
+            phone = phone.Trim();
+            if (phone.Length != 10 || !phone.StartsWith("0") || !phone.All(char.IsDigit))
+            {
+                MessageBox.Show("Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0.", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+        }
 
         var request = new CreateBranchRequest
         {
