@@ -1,4 +1,4 @@
-﻿using FruitShop.Server.Data;
+using FruitShop.Server.Data;
 using FruitShop.Shared.Contracts;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +17,15 @@ public sealed class UserRegistrationService
     {
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             return new LoginResponse { Success = false, Message = "Tên đăng nhập và mật khẩu không được để trống." };
+
+        if (!string.IsNullOrWhiteSpace(request.Phone))
+        {
+            var phone = request.Phone.Trim();
+            if (phone.Length != 10 || !phone.StartsWith("0") || !phone.All(char.IsDigit))
+            {
+                return new LoginResponse { Success = false, Message = "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0." };
+            }
+        }
 
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         var exists = await db.Users.AnyAsync(u => u.Username == request.Username, cancellationToken);

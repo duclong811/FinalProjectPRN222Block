@@ -1,4 +1,4 @@
-﻿using FruitShop.Server.Data;
+using FruitShop.Server.Data;
 using FruitShop.Shared.Contracts;
 using FruitShop.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +48,15 @@ public sealed class UserService
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.FullName))
             return new TcpResponse { Status = "ERROR", Message = "Tên đăng nhập, mật khẩu và họ tên không được để trống." };
 
+        if (!string.IsNullOrWhiteSpace(request.Phone))
+        {
+            var phone = request.Phone.Trim();
+            if (phone.Length != 10 || !phone.StartsWith("0") || !phone.All(char.IsDigit))
+            {
+                return new TcpResponse { Status = "ERROR", Message = "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0." };
+            }
+        }
+
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         if (await db.Users.AnyAsync(u => u.Username == request.Username.Trim(), cancellationToken))
             return new TcpResponse { Status = "ERROR", Message = "Tên đăng nhập đã tồn tại." };
@@ -80,6 +89,15 @@ public sealed class UserService
     {
         if (request.UserId <= 0 || string.IsNullOrWhiteSpace(request.FullName))
             return new TcpResponse { Status = "ERROR", Message = "Dữ liệu người dùng không hợp lệ." };
+
+        if (!string.IsNullOrWhiteSpace(request.Phone))
+        {
+            var phone = request.Phone.Trim();
+            if (phone.Length != 10 || !phone.StartsWith("0") || !phone.All(char.IsDigit))
+            {
+                return new TcpResponse { Status = "ERROR", Message = "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0." };
+            }
+        }
 
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         var user = await db.Users.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);

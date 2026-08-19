@@ -39,4 +39,20 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelector('form').addEventListener('submit', function (e) {
+            var phoneInput = document.getElementById('CustomerPhone');
+            if (phoneInput && phoneInput.value) {
+                var phone = phoneInput.value.trim();
+                if (phone !== '') {
+                    var isNumeric = /^\d+$/.test(phone);
+                    if (phone.length !== 10 || !phone.startsWith('0') || !isNumeric) {
+                        e.preventDefault();
+                        alert('Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0.');
+                        phoneInput.focus();
+                    }
+                }
+            }
+        });
+    </script>
 }
