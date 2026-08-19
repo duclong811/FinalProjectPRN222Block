@@ -42,8 +42,7 @@ public partial class CreateAccountWindow : Window
     {
         var roles = new[]
         {
-            new { Id = 4, Name = "Staff (Nhân viên)" },
-            new { Id = 3, Name = "Manager (Quản lý)" }
+            new { Id = 4, Name = "Staff (Nhân viên)" }
         };
         RoleComboBox.ItemsSource = roles;
         RoleComboBox.SelectedValue = 4; // Mặc định là Staff
@@ -99,6 +98,18 @@ public partial class CreateAccountWindow : Window
             return;
         }
 
+        var phone = PhoneTextBox.Text.Trim();
+        if (!string.IsNullOrWhiteSpace(phone))
+        {
+            if (phone.Length != 10 || !phone.StartsWith("0") || !phone.All(char.IsDigit))
+            {
+                StatusTextBlock.Text = "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0.";
+                MessageBox.Show("Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0.", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
+                PhoneTextBox.Focus();
+                return;
+            }
+        }
+
         var selectedRoleId = (int)(RoleComboBox.SelectedValue ?? 4);
         int? selectedBranchId = null;
 
@@ -113,7 +124,7 @@ public partial class CreateAccountWindow : Window
         RoleId = selectedRoleId;
         BranchId = selectedBranchId;
         Email = string.IsNullOrWhiteSpace(EmailTextBox.Text) ? null : EmailTextBox.Text.Trim();
-        Phone = string.IsNullOrWhiteSpace(PhoneTextBox.Text) ? null : PhoneTextBox.Text.Trim();
+        Phone = string.IsNullOrWhiteSpace(phone) ? null : phone;
         Address = string.IsNullOrWhiteSpace(AddressTextBox.Text) ? null : AddressTextBox.Text.Trim();
 
         DialogResult = true;
