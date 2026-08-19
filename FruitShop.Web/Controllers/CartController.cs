@@ -43,6 +43,10 @@ public class CartController : Controller
         await _shoppingCartService.RemoveAsync(productId, inventoryId);
         return RedirectToAction(nameof(Index));
     }
+    /// <summary>
+    /// /
+    /// </summary>
+    /// <returns></returns>
 
     public async Task<IActionResult> Checkout()
     {
