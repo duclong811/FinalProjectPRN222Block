@@ -1,4 +1,4 @@
-﻿namespace FruitShop.Shared.Contracts;
+namespace FruitShop.Shared.Contracts;
 
 public class ProductDto
 {
@@ -14,6 +14,9 @@ public class ProductDto
     public int MinStockThreshold { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public int ProductId => Id;
+    public string ProductName => Name;
 }
 
 public class CreateProductRequest

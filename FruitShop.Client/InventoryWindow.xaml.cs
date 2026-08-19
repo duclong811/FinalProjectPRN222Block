@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using System.Windows;
 using System.Windows.Input;
@@ -19,11 +19,11 @@ public partial class InventoryWindow : Window
     {
         try
         {
-            var response = await _clientService.GetInventoryAsync();
+            var response = await _clientService.GetProductsAsync();
             if (response.Success)
             {
                 InventoryDataGrid.ItemsSource = response.Items;
-                StatusTextBlock.Text = $"Loaded {response.Items.Count} inventory batches.";
+                StatusTextBlock.Text = $"Đã tải {response.Items.Count} sản phẩm trong kho.";
             }
             else
             {
@@ -32,7 +32,7 @@ public partial class InventoryWindow : Window
         }
         catch (Exception ex)
         {
-            StatusTextBlock.Text = $"Error: {ex.Message}";
+            StatusTextBlock.Text = $"Lỗi: {ex.Message}";
         }
     }
 
@@ -40,19 +40,20 @@ public partial class InventoryWindow : Window
 
     private void ViewBatchesButton_Click(object sender, RoutedEventArgs e)
     {
-        if (InventoryDataGrid.SelectedItem is InventoryDto item)
+        if (InventoryDataGrid.SelectedItem is ProductDto item)
         {
-            new InventoryBatchesWindow(item.ProductId) { Owner = this }.ShowDialog();
+            new InventoryBatchesWindow(item.Id) { Owner = this }.ShowDialog();
         }
         else
         {
-            MessageBox.Show("Please select an inventory item.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Vui lòng chọn một sản phẩm để xem lịch sử lô hàng.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 
     private void UpdateStockButton_Click(object sender, RoutedEventArgs e)
     {
-        var window = new UpdateStockWindow { Owner = this };
+        var selectedProduct = InventoryDataGrid.SelectedItem as ProductDto;
+        var window = new UpdateStockWindow(selectedProduct?.Id) { Owner = this };
         if (window.ShowDialog() == true)
         {
             _ = LoadInventoryAsync();
@@ -61,9 +62,9 @@ public partial class InventoryWindow : Window
 
     private void InventoryDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (InventoryDataGrid.SelectedItem is InventoryDto item)
+        if (InventoryDataGrid.SelectedItem is ProductDto item)
         {
-            new InventoryBatchesWindow(item.ProductId) { Owner = this }.ShowDialog();
+            new InventoryBatchesWindow(item.Id) { Owner = this }.ShowDialog();
         }
     }
 }

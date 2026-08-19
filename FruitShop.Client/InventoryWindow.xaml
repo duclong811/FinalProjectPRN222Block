@@ -9,6 +9,17 @@
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button Content="Import history" Click="ViewBatchesButton_Click" Height="38" Width="110" Margin="0,0,10,0" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" /><Button Content="Receive batch" Click="UpdateStockButton_Click" Height="38" Width="120" Margin="0,0,10,0" Background="#275D38" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" /><Button Content="Refresh" Click="RefreshButton_Click" Height="38" Width="100" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" /></StackPanel>
         </DockPanel>
         <Border Grid.Row="1" Margin="0,22,0,14" Padding="14,10" Background="#E8F2EA" CornerRadius="8"><TextBlock x:Name="StatusTextBlock" Foreground="#275D38" /></Border>
-        <Border Grid.Row="2" Background="White" CornerRadius="10" BorderBrush="#E0E6E1" BorderThickness="1" Padding="10"><DataGrid x:Name="InventoryDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" MouseDoubleClick="InventoryDataGrid_MouseDoubleClick"><DataGrid.Columns><DataGridTextColumn Header="ID" Binding="{Binding ProductId}" Width="70" /><DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="2*" /><DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="*" /><DataGridTextColumn Header="Total stock" Binding="{Binding StockQuantity}" Width="100" /><DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="90" /><DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="*" /></DataGrid.Columns></DataGrid></Border>
+        <Border Grid.Row="2" Background="White" CornerRadius="10" BorderBrush="#E0E6E1" BorderThickness="1" Padding="10">
+            <DataGrid x:Name="InventoryDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" MouseDoubleClick="InventoryDataGrid_MouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="70" />
+                    <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="2*" />
+                    <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="*" />
+                    <DataGridTextColumn Header="Total stock" Binding="{Binding StockQuantity}" Width="100" />
+                    <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="90" />
+                    <DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat={}{0:N0} đ}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
     </Grid>
 </Window>
