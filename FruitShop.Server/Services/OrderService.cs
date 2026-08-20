@@ -76,6 +76,7 @@ public sealed class OrderService
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         var orders = await db.Orders.AsNoTracking()
             .Where(o => o.CustomerId == userId)
+            .Include(o => o.Branch)
             .Include(o => o.OrderDetails)
             .Include(o => o.Payments)
             .OrderByDescending(o => o.CreatedAt)
@@ -96,6 +97,8 @@ public sealed class OrderService
             FinalAmount = o.FinalAmount,
             OrderStatus = o.OrderStatus,
             CreatedAt = o.CreatedAt,
+            BranchId = o.BranchId,
+            BranchName = o.Branch?.BranchName,
             PaymentMethod = o.Payments.FirstOrDefault()?.PaymentMethod ?? "COD",
             PaymentStatus = o.Payments.FirstOrDefault()?.PaymentStatus ?? "Pending",
             Details = o.OrderDetails.Select(d => new OrderDetailDto

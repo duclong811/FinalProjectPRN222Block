@@ -11,7 +11,10 @@
             <p class="text-muted">Mã đơn hàng của quý khách: <strong class="fs-5 text-dark">@Model</strong></p>
             <p class="text-muted">Chi nhánh phụ trách xử lý: <strong class="text-success">@(Context.Session.GetString("SelectedBranchName") ?? "Hệ thống FruitShop")</strong></p>
             <p class="small text-muted">Đơn hàng đang được bộ phận phụ trách chuẩn bị và vận chuyển đến quý khách. Quý khách thanh toán bằng tiền mặt khi nhận hàng.</p>
-            <a asp-controller="Products" asp-action="ListProduct" class="btn btn-luxury mt-3">TIẾP TỤC MUA SẮM</a>
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a asp-controller="Order" asp-action="MyOrders" class="btn btn-luxury px-4 py-2"><i class="bi bi-receipt me-1"></i> XEM ĐƠN HÀNG CỦA TÔI</a>
+                <a asp-controller="Products" asp-action="ListProduct" class="btn btn-outline-dark px-4 py-2">TIẾP TỤC MUA SẮM</a>
+            </div>
         </div>
     </div>
 </section>
