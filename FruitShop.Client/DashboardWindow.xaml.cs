@@ -249,7 +249,7 @@ public partial class DashboardWindow : Window
 
     private void AddProductButton_Click(object sender, RoutedEventArgs e)
     {
-        var window = new AddProductWindow { Owner = this };
+        var window = new AddProductWindow(_currentSelectedBranchId) { Owner = this };
         if (window.ShowDialog() == true)
         {
             _ = LoadProductsAsync();
