@@ -8,38 +8,43 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <DockPanel>
-            <StackPanel>
-                <TextBlock Text="Quản Lý Kho Hàng Chi Nhánh" FontSize="28" FontWeight="SemiBold" Foreground="#1D2A20" />
-                <TextBlock x:Name="SubtitleTextBlock" Text="Chọn chi nhánh và double-click sản phẩm để xem hoặc nhập lô hàng mới." Margin="0,7,0,0" Foreground="#66706A" />
-            </StackPanel>
+
+        <!-- Top Action Header -->
+        <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Border Background="White" BorderBrush="#275D38" BorderThickness="1.5" CornerRadius="8" Padding="10,4" Margin="0,0,10,0" VerticalAlignment="Center">
+                <Border Background="#FFFFFF" BorderBrush="#C2D6C6" BorderThickness="1.2" CornerRadius="8" Padding="12,0,8,0" Margin="0,0,10,0" Height="38" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="🏢 Kho:" VerticalAlignment="Center" Margin="0,0,8,0" FontWeight="SemiBold" Foreground="#1F4D30" FontSize="13" />
-                        <ComboBox x:Name="BranchFilterComboBox" Width="200" Height="32" VerticalContentAlignment="Center" BorderThickness="0" Background="Transparent" DisplayMemberPath="BranchName" SelectedValuePath="Id" SelectionChanged="BranchFilterComboBox_SelectionChanged" FontSize="13" Cursor="Hand" />
+                        <ComboBox x:Name="BranchFilterComboBox" Width="200" Height="30" VerticalContentAlignment="Center" BorderThickness="0" Background="Transparent" DisplayMemberPath="BranchName" SelectedValuePath="Id" SelectionChanged="BranchFilterComboBox_SelectionChanged" FontSize="13" Cursor="Hand" />
                     </StackPanel>
                 </Border>
-                <Button Content="Lịch sử lô hàng" Click="ViewBatchesButton_Click" Height="38" Width="120" Margin="0,0,10,0" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" />
-                <Button Content="Nhập lô hàng" Click="UpdateStockButton_Click" Height="38" Width="120" Margin="0,0,10,0" Background="#275D38" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" />
-                <Button Content="Tải lại" Click="RefreshButton_Click" Height="38" Width="90" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" />
+                <Button Style="{StaticResource ModernSecondaryButton}" Content="📜 Lịch sử lô hàng" Click="ViewBatchesButton_Click" Padding="14,0" Margin="0,0,10,0" />
+                <Button Style="{StaticResource ModernPrimaryButton}" Content="+ Nhập lô hàng" Click="UpdateStockButton_Click" Padding="14,0" Margin="0,0,10,0" />
+                <Button Style="{StaticResource ModernSecondaryButton}" Content="🔄 Tải lại" Click="RefreshButton_Click" Padding="14,0" />
+            </StackPanel>
+
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Quản Lý Kho Hàng Chi Nhánh" FontSize="26" FontWeight="Bold" Foreground="#1D2A20" />
+                <TextBlock x:Name="SubtitleTextBlock" Text="Chọn chi nhánh và double-click sản phẩm để xem hoặc nhập lô hàng mới." Margin="0,4,0,0" Foreground="#5A665E" FontSize="13" TextTrimming="CharacterEllipsis" />
             </StackPanel>
         </DockPanel>
-        <Border Grid.Row="1" Margin="0,20,0,14" Padding="14,10" Background="#E8F2EA" CornerRadius="8">
+
+        <Border Grid.Row="1" Margin="0,18,0,14" Padding="14,10" Background="#E8F2EA" CornerRadius="8">
             <DockPanel>
                 <TextBlock x:Name="BranchBadgeTextBlock" Text="🏢 Kho Chi Nhánh: Toàn bộ hệ thống" DockPanel.Dock="Right" FontWeight="SemiBold" Foreground="#1F4D30" />
                 <TextBlock x:Name="StatusTextBlock" Foreground="#275D38" FontWeight="Medium" />
             </DockPanel>
         </Border>
+
         <Border Grid.Row="2" Background="White" CornerRadius="10" BorderBrush="#E0E6E1" BorderThickness="1" Padding="10">
-            <DataGrid x:Name="InventoryDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" MouseDoubleClick="InventoryDataGrid_MouseDoubleClick">
+            <DataGrid x:Name="InventoryDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" MouseDoubleClick="InventoryDataGrid_MouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="70" />
-                    <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="2*" />
-                    <DataGridTextColumn Header="Danh mục" Binding="{Binding CategoryName}" Width="*" />
+                    <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="2*" MinWidth="180" />
+                    <DataGridTextColumn Header="Danh mục" Binding="{Binding CategoryName}" Width="*" MinWidth="120" />
                     <DataGridTextColumn Header="Tồn kho khả dụng" Binding="{Binding StockQuantity}" Width="150" FontWeight="Bold" />
                     <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="90" />
-                    <DataGridTextColumn Header="Giá bán (đ)" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="*" />
+                    <DataGridTextColumn Header="Giá bán (đ)" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="*" MinWidth="110" />
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

@@ -8,28 +8,33 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <DockPanel>
-            <StackPanel>
-                <TextBlock Text="Quản Lý Hạn Sử Dụng Kho Hàng" FontSize="28" FontWeight="SemiBold" Foreground="#1D2A20" />
-                <TextBlock Text="Sản phẩm từ hôm nay đến 2 ngày tới được xem là sắp hết hạn (giảm giá 50% tự động trên Web)." Margin="0,7,0,0" Foreground="#66706A" />
-            </StackPanel>
+
+        <!-- Top Action Header -->
+        <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Border Background="White" BorderBrush="#275D38" BorderThickness="1.5" CornerRadius="8" Padding="10,4" Margin="0,0,10,0" VerticalAlignment="Center">
+                <Border Background="#FFFFFF" BorderBrush="#C2D6C6" BorderThickness="1.2" CornerRadius="8" Padding="12,0,8,0" Margin="0,0,10,0" Height="38" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="🏢 Kho:" VerticalAlignment="Center" Margin="0,0,8,0" FontWeight="SemiBold" Foreground="#1F4D30" FontSize="13" />
-                        <ComboBox x:Name="BranchFilterComboBox" Width="200" Height="32" VerticalContentAlignment="Center" BorderThickness="0" Background="Transparent" DisplayMemberPath="BranchName" SelectedValuePath="Id" SelectionChanged="BranchFilterComboBox_SelectionChanged" FontSize="13" Cursor="Hand" />
+                        <ComboBox x:Name="BranchFilterComboBox" Width="200" Height="30" VerticalContentAlignment="Center" BorderThickness="0" Background="Transparent" DisplayMemberPath="BranchName" SelectedValuePath="Id" SelectionChanged="BranchFilterComboBox_SelectionChanged" FontSize="13" Cursor="Hand" />
                     </StackPanel>
                 </Border>
-                <Button Content="Ẩn sản phẩm đã chọn" Click="HideSelectedButton_Click" Height="38" Width="150" Margin="0,0,10,0" Background="#B42318" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" />
-                <Button Content="Tải lại" Click="RefreshButton_Click" Height="38" Width="90" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" />
+                <Button Style="{StaticResource ModernDangerButton}" Content="🚫 Ẩn sản phẩm đã chọn" Click="HideSelectedButton_Click" Padding="16,0" Margin="0,0,10,0" />
+                <Button Style="{StaticResource ModernSecondaryButton}" Content="🔄 Tải lại" Click="RefreshButton_Click" Padding="14,0" />
+            </StackPanel>
+
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Quản Lý Hạn Sử Dụng Kho Hàng" FontSize="26" FontWeight="Bold" Foreground="#1D2A20" />
+                <TextBlock Text="Sản phẩm từ hôm nay đến 2 ngày tới được xem là sắp hết hạn (giảm giá 50% tự động trên Web)." Margin="0,4,0,0" Foreground="#5A665E" FontSize="13" TextTrimming="CharacterEllipsis" />
             </StackPanel>
         </DockPanel>
-        <Border Grid.Row="1" Margin="0,20,0,14" Padding="14,10" Background="#E8F2EA" CornerRadius="8">
+
+        <Border Grid.Row="1" Margin="0,18,0,14" Padding="14,10" Background="#E8F2EA" CornerRadius="8">
             <DockPanel>
                 <TextBlock x:Name="BranchBadgeTextBlock" Text="🏢 Kho Chi Nhánh: Toàn bộ hệ thống" DockPanel.Dock="Right" FontWeight="SemiBold" Foreground="#1F4D30" />
                 <TextBlock x:Name="StatusTextBlock" Foreground="#275D38" FontWeight="Medium" />
             </DockPanel>
         </Border>
+
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -42,16 +47,16 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="⏳ Sắp hết hạn (0-2 ngày)" Foreground="#A15C00" FontSize="17" FontWeight="SemiBold" Margin="6,4,0,12" />
-                    <DataGrid x:Name="ExpiringSoonDataGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="40" SelectionChanged="ExpiringSoonDataGrid_SelectionChanged">
+                    <TextBlock Text="⏳ Sắp hết hạn (0-2 ngày)" Foreground="#A15C00" FontSize="16" FontWeight="Bold" Margin="6,4,0,12" />
+                    <DataGrid x:Name="ExpiringSoonDataGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" SelectionChanged="ExpiringSoonDataGrid_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Sản phẩm" Binding="{Binding ProductName}" Width="*" />
+                            <DataGridTextColumn Header="Sản phẩm" Binding="{Binding ProductName}" Width="*" MinWidth="130" />
                             <DataGridTextColumn Header="Chi nhánh" Binding="{Binding BranchName}" Width="130" FontWeight="SemiBold" />
                             <DataGridTextColumn Header="Mã lô" Binding="{Binding BatchCode}" Width="100" />
                             <DataGridTextColumn Header="Hạn dùng" Binding="{Binding ExpiryDate, StringFormat={}{0:dd/MM/yyyy}}" Width="95" />
-                            <DataGridTextColumn Header="Còn (ngày)" Binding="{Binding DaysRemaining}" Width="80" />
-                            <DataGridTextColumn Header="Tồn" Binding="{Binding StockQuantity}" Width="60" FontWeight="Bold" />
-                            <DataGridTextColumn Header="ĐVT" Binding="{Binding Unit}" Width="60" />
+                            <DataGridTextColumn Header="Còn (ngày)" Binding="{Binding DaysRemaining}" Width="85" />
+                            <DataGridTextColumn Header="Tồn" Binding="{Binding StockQuantity}" Width="65" FontWeight="Bold" />
+                            <DataGridTextColumn Header="ĐVT" Binding="{Binding Unit}" Width="65" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -62,16 +67,16 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="❌ Đã hết hạn" Foreground="#B42318" FontSize="17" FontWeight="SemiBold" Margin="6,4,0,12" />
-                    <DataGrid x:Name="ExpiredDataGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="40" SelectionChanged="ExpiredDataGrid_SelectionChanged">
+                    <TextBlock Text="❌ Đã hết hạn" Foreground="#B42318" FontSize="16" FontWeight="Bold" Margin="6,4,0,12" />
+                    <DataGrid x:Name="ExpiredDataGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" SelectionChanged="ExpiredDataGrid_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Sản phẩm" Binding="{Binding ProductName}" Width="*" />
+                            <DataGridTextColumn Header="Sản phẩm" Binding="{Binding ProductName}" Width="*" MinWidth="130" />
                             <DataGridTextColumn Header="Chi nhánh" Binding="{Binding BranchName}" Width="130" FontWeight="SemiBold" />
                             <DataGridTextColumn Header="Mã lô" Binding="{Binding BatchCode}" Width="100" />
                             <DataGridTextColumn Header="Hạn dùng" Binding="{Binding ExpiryDate, StringFormat={}{0:dd/MM/yyyy}}" Width="95" />
-                            <DataGridTextColumn Header="Quá hạn" Binding="{Binding DaysOverdue}" Width="80" />
-                            <DataGridTextColumn Header="Tồn" Binding="{Binding StockQuantity}" Width="60" FontWeight="Bold" />
-                            <DataGridTextColumn Header="ĐVT" Binding="{Binding Unit}" Width="60" />
+                            <DataGridTextColumn Header="Quá hạn" Binding="{Binding DaysOverdue}" Width="85" />
+                            <DataGridTextColumn Header="Tồn" Binding="{Binding StockQuantity}" Width="65" FontWeight="Bold" />
+                            <DataGridTextColumn Header="ĐVT" Binding="{Binding Unit}" Width="65" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
