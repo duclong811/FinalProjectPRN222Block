@@ -9,6 +9,7 @@ public partial class DashboardWindow : Window
 {
     private readonly TcpClientService _clientService = new("127.0.0.1", 5055);
     private List<ProductDto> _allProducts = new();
+    private List<UserDto> _users = new();
     private List<BranchDto> _branches = new();
     private readonly string _roleName;
     private readonly int? _branchId;
@@ -31,7 +32,14 @@ public partial class DashboardWindow : Window
         Loaded += async (_, _) =>
         {
             await LoadBranchesAsync();
-            await LoadProductsAsync();
+            if (_roleName.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                await LoadUsersAsync();
+            }
+            else
+            {
+                await LoadProductsAsync();
+            }
             await LoadNotificationCountAsync();
         };
     }
@@ -51,8 +59,13 @@ public partial class DashboardWindow : Window
             OrdersNavigationButton.Visibility = Visibility.Collapsed;
 
             ProductActionPanel.Visibility = Visibility.Collapsed;
-            PageTitleTextBlock.Text = "Quản Lý Hệ Thống Admin";
-            PageSubtitleTextBlock.Text = "Bấm nút 'Quản lý tài khoản' ở menu bên trái để phân quyền và tạo tài khoản Manager/Staff.";
+            UserActionPanel.Visibility = Visibility.Visible;
+            ProductsDataGrid.Visibility = Visibility.Collapsed;
+            UsersDataGrid.Visibility = Visibility.Visible;
+            BranchBadgeTextBlock.Visibility = Visibility.Collapsed;
+
+            PageTitleTextBlock.Text = "Quản Lý Người Dùng & Phân Quyền";
+            PageSubtitleTextBlock.Text = "Danh sách tài khoản Admin, Manager, Staff và Customer trong hệ thống.";
         }
         else if (_roleName.Equals("Manager", StringComparison.OrdinalIgnoreCase))
         {
@@ -226,7 +239,83 @@ public partial class DashboardWindow : Window
         }
     }
 
-    private void UsersNavigationButton_Click(object sender, RoutedEventArgs e) => new UserManagementWindow { Owner = this }.ShowDialog();
+    private async Task LoadUsersAsync()
+    {
+        try
+        {
+            var response = await _clientService.GetUsersAsync();
+            if (!response.Success)
+            {
+                StatusTextBlock.Text = response.Message;
+                return;
+            }
+
+            _users = response.Items;
+            UsersDataGrid.ItemsSource = _users;
+            StatusTextBlock.Text = $"Đã tải {_users.Count} người dùng.";
+        }
+        catch (Exception ex)
+        {
+            StatusTextBlock.Text = $"Lỗi: {ex.Message}";
+        }
+    }
+
+    private async void RefreshUsersButton_Click(object sender, RoutedEventArgs e) => await LoadUsersAsync();
+
+    private async void AddUserButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new CreateAccountWindow { Owner = this };
+        if (dialog.ShowDialog() == true)
+        {
+            var request = new CreateUserRequest
+            {
+                Username = dialog.AccountUsername,
+                Password = dialog.AccountPassword,
+                FullName = dialog.AccountFullName,
+                RoleId = dialog.RoleId,
+                BranchId = dialog.BranchId,
+                Email = dialog.Email,
+                Phone = dialog.Phone,
+                Address = dialog.Address
+            };
+
+            var res = await _clientService.CreateUserAsync(request);
+            MessageBox.Show(res.Message, "Thông báo", MessageBoxButton.OK, res.Status == "SUCCESS" ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            await LoadUsersAsync();
+        }
+    }
+
+    private async void ToggleActive_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.DataContext is UserDto user)
+        {
+            var res = await _clientService.ToggleUserActiveAsync(user.Id);
+            MessageBox.Show(res.Message, "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            await LoadUsersAsync();
+        }
+    }
+
+    private async void ResetPassword_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.DataContext is UserDto user)
+        {
+            var newPass = Microsoft.VisualBasic.Interaction.InputBox($"Nhập mật khẩu mới cho '{user.Username}':", "Reset Mật Khẩu", "");
+            if (string.IsNullOrWhiteSpace(newPass)) return;
+
+            var confirm = MessageBox.Show(
+                $"Bạn có chắc chắn muốn đổi mật khẩu cho tài khoản '{user.Username}' không?",
+                "Xác nhận đổi mật khẩu",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            var res = await _clientService.ResetUserPasswordAsync(new ResetPasswordRequest { UserId = user.Id, NewPassword = newPass });
+            MessageBox.Show(res.Message, "Thông báo", MessageBoxButton.OK, res.Status == "SUCCESS" ? MessageBoxImage.Information : MessageBoxImage.Warning);
+        }
+    }
+
+    private void UsersNavigationButton_Click(object sender, RoutedEventArgs e) => _ = LoadUsersAsync();
     private void BranchesNavigationButton_Click(object sender, RoutedEventArgs e) => new BranchManagementWindow { Owner = this }.ShowDialog();
     private void ProductsNavigationButton_Click(object sender, RoutedEventArgs e) => _ = LoadProductsAsync();
     private void InventoryNavigationButton_Click(object sender, RoutedEventArgs e) => new InventoryWindow(_currentSelectedBranchId) { Owner = this }.ShowDialog();

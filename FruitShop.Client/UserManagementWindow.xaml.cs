@@ -76,11 +76,19 @@ public partial class UserManagementWindow : Window
     {
         if (sender is Button btn && btn.DataContext is UserDto user)
         {
-            var newPass = Microsoft.VisualBasic.Interaction.InputBox($"Nhập mật khẩu mới cho '{user.Username}':", "Reset Mật Khẩu", "admin123");
+            var newPass = Microsoft.VisualBasic.Interaction.InputBox($"Nhập mật khẩu mới cho '{user.Username}':", "Reset Mật Khẩu", "");
             if (string.IsNullOrWhiteSpace(newPass)) return;
 
+            var confirm = MessageBox.Show(
+                $"Bạn có chắc chắn muốn đổi mật khẩu cho tài khoản '{user.Username}' không?",
+                "Xác nhận đổi mật khẩu",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
             var res = await _clientService.ResetUserPasswordAsync(new ResetPasswordRequest { UserId = user.Id, NewPassword = newPass });
-            MessageBox.Show(res.Message, "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(res.Message, "Thông báo", MessageBoxButton.OK, res.Status == "SUCCESS" ? MessageBoxImage.Information : MessageBoxImage.Warning);
         }
     }
 
