@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using Microsoft.Win32;
 using System.IO;
@@ -11,11 +11,46 @@ public partial class AddProductWindow : Window
     private readonly TcpClientService _clientService = new("127.0.0.1", 5055);
     private string? _selectedImagePath;
     private List<CategoryDto> _categories = new();
+    private List<BranchDto> _branches = new();
+    private readonly int? _preselectedBranchId;
 
-    public AddProductWindow()
+    public AddProductWindow(int? preselectedBranchId = null)
     {
         InitializeComponent();
-        Loaded += async (_, _) => await LoadCategoriesAsync();
+        _preselectedBranchId = preselectedBranchId;
+        ExpiryDatePicker.SelectedDate = DateTime.Today.AddDays(30);
+
+        Loaded += async (_, _) =>
+        {
+            await LoadBranchesAsync();
+            await LoadCategoriesAsync();
+        };
+    }
+
+    private async Task LoadBranchesAsync()
+    {
+        try
+        {
+            var response = await _clientService.GetBranchesAsync();
+            if (response.Success && response.Items.Count > 0)
+            {
+                _branches = response.Items;
+                BranchComboBox.ItemsSource = _branches;
+
+                if (_preselectedBranchId.HasValue && _preselectedBranchId.Value > 0 && _branches.Any(b => b.Id == _preselectedBranchId.Value))
+                {
+                    BranchComboBox.SelectedValue = _preselectedBranchId.Value;
+                }
+                else
+                {
+                    BranchComboBox.SelectedIndex = 0;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusTextBlock.Text = $"Không thể tải danh sách chi nhánh: {ex.Message}";
+        }
     }
 
     private async Task LoadCategoriesAsync()
@@ -23,11 +58,11 @@ public partial class AddProductWindow : Window
         try
         {
             var response = await _clientService.GetCategoriesAsync();
-            if (response.Success)
+            if (response.Success && response.Items.Count > 0)
             {
                 _categories = response.Items;
                 CategoryComboBox.ItemsSource = _categories;
-                if (_categories.Count > 0) CategoryComboBox.SelectedIndex = 0;
+                CategoryComboBox.SelectedIndex = 0;
             }
         }
         catch (Exception ex)
@@ -51,12 +86,6 @@ public partial class AddProductWindow : Window
 
     private async void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        if (CategoryComboBox.SelectedItem is not CategoryDto selectedCategory)
-        {
-            StatusTextBlock.Text = "Vui lòng chọn danh mục.";
-            return;
-        }
-
         var name = NameTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -64,10 +93,32 @@ public partial class AddProductWindow : Window
             return;
         }
 
+        if (BranchComboBox.SelectedItem is not BranchDto selectedBranch)
+        {
+            StatusTextBlock.Text = "Vui lòng chọn chi nhánh áp dụng.";
+            return;
+        }
+
+        if (CategoryComboBox.SelectedItem is not CategoryDto selectedCategory)
+        {
+            StatusTextBlock.Text = "Vui lòng chọn danh mục.";
+            return;
+        }
+
         if (!decimal.TryParse(PriceTextBox.Text.Trim(), out var price) || price < 0)
         {
-            StatusTextBlock.Text = "Vui lòng nhập giá hợp lệ.";
+            StatusTextBlock.Text = "Vui lòng nhập giá bán hợp lệ.";
             return;
+        }
+
+        int initialStock = 50;
+        if (!string.IsNullOrWhiteSpace(InitialStockTextBox.Text))
+        {
+            if (!int.TryParse(InitialStockTextBox.Text.Trim(), out initialStock) || initialStock < 0)
+            {
+                StatusTextBlock.Text = "Số lượng tồn kho ban đầu phải là số nguyên không âm.";
+                return;
+            }
         }
 
         var unit = UnitTextBox.Text.Trim();
@@ -88,10 +139,13 @@ public partial class AddProductWindow : Window
 
         var request = new CreateProductRequest
         {
+            BranchId = selectedBranch.Id,
             CategoryId = selectedCategory.Id,
             Name = name,
             Description = DescriptionTextBox.Text.Trim(),
             Price = price,
+            InitialStock = initialStock,
+            ExpiryDate = ExpiryDatePicker.SelectedDate ?? DateTime.Today.AddDays(30),
             Unit = unit,
             ImageBase64 = imageBase64,
             ImageFileName = imageFileName
@@ -103,14 +157,9 @@ public partial class AddProductWindow : Window
             var response = await _clientService.CreateProductAsync(request);
             if (response.Status == "SUCCESS")
             {
-                var askReceive = MessageBox.Show($"{response.Message}\n\nBạn có muốn nhập lô kho đầu tiên cho sản phẩm này ngay không (để hiển thị lên Web)?", "Nhập Kho Ngay", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                MessageBox.Show($"Tạo sản phẩm '{name}' cho chi nhánh '{selectedBranch.BranchName}' thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 DialogResult = true;
                 Close();
-
-                if (askReceive == MessageBoxResult.Yes)
-                {
-                    new UpdateStockWindow().ShowDialog();
-                }
             }
             else
             {

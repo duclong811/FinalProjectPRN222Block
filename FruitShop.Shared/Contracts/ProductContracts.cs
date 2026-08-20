@@ -22,6 +22,9 @@ public class ProductDto
 public class CreateProductRequest
 {
     public int CategoryId { get; set; }
+    public int? BranchId { get; set; }
+    public int InitialStock { get; set; } = 50;
+    public DateTime? ExpiryDate { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal Price { get; set; }

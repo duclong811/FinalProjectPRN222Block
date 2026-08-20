@@ -305,13 +305,14 @@ public sealed class ProductManagementService
                 imageUrl = $"/images/products/{fileName}";
             }
 
+            var initialStock = request.InitialStock > 0 ? request.InitialStock : 0;
             var product = new Product
             {
                 CategoryId = request.CategoryId,
                 Name = request.Name.Trim(),
                 Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
                 Price = request.Price,
-                StockQuantity = 0,
+                StockQuantity = initialStock,
                 Unit = request.Unit.Trim(),
                 ImageUrl = imageUrl,
                 MinStockThreshold = request.MinStockThreshold > 0 ? request.MinStockThreshold : 10,
@@ -321,6 +322,25 @@ public sealed class ProductManagementService
 
             db.Products.Add(product);
             await db.SaveChangesAsync(cancellationToken);
+
+            // If a branch is selected and stock is given, create initial inventory batch for that specific branch
+            if (request.BranchId.HasValue && request.BranchId.Value > 0)
+            {
+                var stockQty = initialStock > 0 ? initialStock : 50;
+                var batch = new Inventory
+                {
+                    ProductId = product.Id,
+                    BranchId = request.BranchId.Value,
+                    BatchCode = $"BATCH-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(100, 999)}",
+                    QuantityReceived = stockQty,
+                    RemainingQuantity = stockQty,
+                    ReceivedAt = DateTime.Now,
+                    ExpiryDate = request.ExpiryDate ?? DateTime.Today.AddDays(30),
+                    CreatedAt = DateTime.Now
+                };
+                db.Inventories.Add(batch);
+                await db.SaveChangesAsync(cancellationToken);
+            }
 
             return new TcpResponse { Status = "SUCCESS", Message = "Tạo sản phẩm mới thành công." };
         }
