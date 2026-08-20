@@ -87,8 +87,8 @@
                                 <form asp-action="Update" method="post" class="d-flex align-items-center gap-2">
                                     <input type="hidden" name="productId" value="@item.ProductId" />
                                     <input type="hidden" name="inventoryId" value="@item.InventoryId" />
-                                    <input class="form-control form-control-sm text-center" type="number" name="quantity" value="@item.Quantity" min="1" max="@item.AvailableStock" style="width: 70px;">
-                                    <button class="btn btn-outline-luxury py-1 px-2 btn-sm" type="submit" title="Cập nhật"><i class="bi bi-arrow-repeat"></i></button>
+                                    <input class="form-control form-control-sm text-center" type="number" name="quantity" value="@item.Quantity" min="1" max="@item.AvailableStock" style="width: 70px;" onchange="this.form.submit()" onkeypress="if(event.keyCode===13){this.form.submit();}">
+                                    <button class="btn btn-outline-luxury py-1 px-2 btn-sm" type="submit" title="Cập nhật số lượng"><i class="bi bi-arrow-repeat"></i></button>
                                 </form>
                                 <div class="text-end" style="min-width: 110px;">
                                     <div class="fw-bold font-serif text-dark">@item.LineTotal.ToString("N0") ₫</div>
