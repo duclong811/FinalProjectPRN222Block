@@ -105,9 +105,38 @@ public partial class AddProductWindow : Window
             return;
         }
 
-        if (!decimal.TryParse(PriceTextBox.Text.Trim(), out var price) || price < 0)
+        var unit = UnitTextBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(unit))
         {
-            StatusTextBlock.Text = "Vui lòng nhập giá bán hợp lệ.";
+            StatusTextBlock.Text = "Đơn vị tính là bắt buộc.";
+            return;
+        }
+
+        decimal? unitCost = null;
+        if (!string.IsNullOrWhiteSpace(UnitCostTextBox.Text))
+        {
+            if (!decimal.TryParse(UnitCostTextBox.Text.Trim(), out var parsedCost) || parsedCost < 0)
+            {
+                StatusTextBlock.Text = "Giá nhập (vốn) không hợp lệ.";
+                return;
+            }
+            unitCost = parsedCost;
+        }
+
+        decimal? sellingPrice = null;
+        if (!string.IsNullOrWhiteSpace(SellingPriceTextBox.Text))
+        {
+            if (!decimal.TryParse(SellingPriceTextBox.Text.Trim(), out var parsedPrice) || parsedPrice <= 0)
+            {
+                StatusTextBlock.Text = "Giá bán ra phải là số dương hợp lệ.";
+                return;
+            }
+            sellingPrice = parsedPrice;
+        }
+
+        if (unitCost.HasValue && sellingPrice.HasValue && sellingPrice.Value < unitCost.Value)
+        {
+            StatusTextBlock.Text = "Giá bán ra không được thấp hơn giá nhập (vốn). Vui lòng kiểm tra lại.";
             return;
         }
 
@@ -119,13 +148,6 @@ public partial class AddProductWindow : Window
                 StatusTextBlock.Text = "Số lượng tồn kho ban đầu phải là số nguyên không âm.";
                 return;
             }
-        }
-
-        var unit = UnitTextBox.Text.Trim();
-        if (string.IsNullOrWhiteSpace(unit))
-        {
-            StatusTextBlock.Text = "Đơn vị tính là bắt buộc.";
-            return;
         }
 
         string? imageBase64 = null;
@@ -143,7 +165,9 @@ public partial class AddProductWindow : Window
             CategoryId = selectedCategory.Id,
             Name = name,
             Description = DescriptionTextBox.Text.Trim(),
-            Price = price,
+            Price = sellingPrice ?? 0,
+            UnitCost = unitCost,
+            SellingPrice = sellingPrice,
             InitialStock = initialStock,
             ExpiryDate = ExpiryDatePicker.SelectedDate ?? DateTime.Today.AddDays(30),
             Unit = unit,

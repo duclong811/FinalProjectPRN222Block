@@ -1,4 +1,4 @@
-﻿using FruitShop.Client.Services;
+using FruitShop.Client.Services;
 using FruitShop.Shared.Contracts;
 using Microsoft.Win32;
 using System.IO;
@@ -47,7 +47,6 @@ public partial class EditProductWindow : Window
         ProductCodeTextBlock.Text = $"Mã sản phẩm: #{_product.Id}";
         NameTextBox.Text = _product.Name;
         DescriptionTextBox.Text = _product.Description;
-        PriceTextBox.Text = _product.Price.ToString("F2");
         UnitTextBox.Text = _product.Unit;
         if (_categories.Count > 0)
         {
@@ -89,12 +88,6 @@ public partial class EditProductWindow : Window
             return;
         }
 
-        if (!decimal.TryParse(PriceTextBox.Text.Trim(), out var price) || price < 0)
-        {
-            StatusTextBlock.Text = "Vui lòng nhập giá hợp lệ.";
-            return;
-        }
-
         var unit = UnitTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(unit))
         {
@@ -117,7 +110,7 @@ public partial class EditProductWindow : Window
             CategoryId = selectedCategory.Id,
             Name = name,
             Description = DescriptionTextBox.Text.Trim(),
-            Price = price,
+            Price = _product.Price,
             Unit = unit,
             ReplaceImage = _replaceImage,
             ImageBase64 = imageBase64,

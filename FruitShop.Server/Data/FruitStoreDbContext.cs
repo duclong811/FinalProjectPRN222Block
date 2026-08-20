@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace FruitShop.Server.Data;
 
@@ -80,6 +80,7 @@ internal sealed class FruitStoreDbContext : DbContext
             entity.Property(e => e.BatchCode).HasMaxLength(50);
             entity.Property(e => e.ExpiryDate).HasColumnType("date");
             entity.Property(e => e.UnitCost).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.SellingPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.SupplierName).HasMaxLength(150);
             entity.Property(e => e.Note).HasMaxLength(500);
             entity.HasOne(e => e.Product).WithMany(e => e.Inventories).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Restrict);
@@ -236,6 +237,7 @@ internal sealed class Inventory
     public DateTime ReceivedAt { get; set; } = DateTime.Now;
     public DateTime ExpiryDate { get; set; }
     public decimal? UnitCost { get; set; }
+    public decimal? SellingPrice { get; set; }
     public string? SupplierName { get; set; }
     public string? Note { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;

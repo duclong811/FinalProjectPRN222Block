@@ -20,39 +20,51 @@
                 <TextBlock Text="Tên sản phẩm *" FontWeight="SemiBold" Foreground="#1D2A20" />
                 <TextBox x:Name="NameTextBox" Margin="0,6,0,14" Height="38" Padding="10,7" FontSize="13" VerticalContentAlignment="Center" />
 
-                <!-- 2. Chọn chi nhánh -->
+                <!-- 2. Chọn chi nhánh áp dụng -->
                 <TextBlock Text="Chi nhánh áp dụng *" FontWeight="SemiBold" Foreground="#1D2A20" />
                 <ComboBox x:Name="BranchComboBox" DisplayMemberPath="BranchName" SelectedValuePath="Id" Margin="0,6,0,14" Height="38" Padding="8" FontSize="13" VerticalContentAlignment="Center" Cursor="Hand" />
 
-                <!-- 3. Chọn danh mục -->
-                <TextBlock Text="Danh mục sản phẩm *" FontWeight="SemiBold" Foreground="#1D2A20" />
-                <ComboBox x:Name="CategoryComboBox" DisplayMemberPath="Name" SelectedValuePath="Id" Margin="0,6,0,14" Height="38" Padding="8" FontSize="13" VerticalContentAlignment="Center" Cursor="Hand" />
-
-                <!-- 4. Giá bán & Tồn kho ban đầu -->
+                <!-- 3. Chọn danh mục & Đơn vị tính -->
                 <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Margin="0,0,8,0">
-                        <TextBlock Text="Giá bán (đ) *" FontWeight="SemiBold" Foreground="#1D2A20" />
-                        <TextBox x:Name="PriceTextBox" Margin="0,6,0,0" Height="38" Padding="10,7" FontSize="13" VerticalContentAlignment="Center" />
+                        <TextBlock Text="Danh mục sản phẩm *" FontWeight="SemiBold" Foreground="#1D2A20" />
+                        <ComboBox x:Name="CategoryComboBox" DisplayMemberPath="Name" SelectedValuePath="Id" Margin="0,6,0,0" Height="38" Padding="8" FontSize="13" VerticalContentAlignment="Center" Cursor="Hand" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                        <TextBlock Text="Số lượng tồn kho ban đầu" FontWeight="SemiBold" Foreground="#1D2A20" />
-                        <TextBox x:Name="InitialStockTextBox" Text="50" Margin="0,6,0,0" Height="38" Padding="10,7" FontSize="13" VerticalContentAlignment="Center" />
+                        <TextBlock Text="Đơn vị tính *" FontWeight="SemiBold" Foreground="#1D2A20" />
+                        <TextBox x:Name="UnitTextBox" Margin="0,6,0,0" Height="38" Padding="10,7" Text="kg" FontSize="13" VerticalContentAlignment="Center" />
                     </StackPanel>
                 </Grid>
 
-                <!-- 5. Đơn vị tính & Hạn sử dụng -->
+                <!-- 4. Giá nhập & Giá bán ra -->
                 <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Margin="0,0,8,0">
-                        <TextBlock Text="Đơn vị tính *" FontWeight="SemiBold" Foreground="#1D2A20" />
-                        <TextBox x:Name="UnitTextBox" Margin="0,6,0,0" Height="38" Padding="10,7" Text="kg" FontSize="13" VerticalContentAlignment="Center" />
+                        <TextBlock Text="Giá nhập / Vốn (đ)" FontWeight="SemiBold" Foreground="#1D2A20" />
+                        <TextBox x:Name="UnitCostTextBox" Margin="0,6,0,0" Height="38" Padding="10,7" FontSize="13" VerticalContentAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                        <TextBlock Text="Giá bán ra (đ) *" FontWeight="SemiBold" Foreground="#1D2A20" />
+                        <TextBox x:Name="SellingPriceTextBox" Margin="0,6,0,0" Height="38" Padding="10,7" FontSize="13" VerticalContentAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- 5. Tồn kho ban đầu & Hạn sử dụng lô kho -->
+                <Grid Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,8,0">
+                        <TextBlock Text="Số lượng tồn kho ban đầu" FontWeight="SemiBold" Foreground="#1D2A20" />
+                        <TextBox x:Name="InitialStockTextBox" Text="50" Margin="0,6,0,0" Height="38" Padding="10,7" FontSize="13" VerticalContentAlignment="Center" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
                         <TextBlock Text="Hạn sử dụng lô kho" FontWeight="SemiBold" Foreground="#1D2A20" />

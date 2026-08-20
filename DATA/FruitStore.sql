@@ -1,4 +1,4 @@
-﻿-- ================================================================
+-- ================================================================
 -- SCRIPT TẠO MỚI TOÀN BỘ DATABASE: FruitStoreDb
 -- Ngày tạo: 2026-08-16 (Cập nhật Seed Data: 2026-08-17)
 -- Mô tả: Khởi tạo mới database từ đầu với đầy đủ 11 bảng chuẩn + Seed Data mẫu
@@ -124,6 +124,7 @@ CREATE TABLE [dbo].[Inventories] (
     [ReceivedAt]        DATETIME NOT NULL DEFAULT GETDATE(),
     [ExpiryDate]        DATE NOT NULL,
     [UnitCost]          DECIMAL(18,2) NULL,
+    [SellingPrice]      DECIMAL(18,2) NULL,
     [SupplierName]      NVARCHAR(150) NULL,
     [Note]              NVARCHAR(500) NULL,
     [CreatedAt]         DATETIME NOT NULL DEFAULT GETDATE(),
@@ -131,7 +132,8 @@ CREATE TABLE [dbo].[Inventories] (
     CONSTRAINT [FK_Inventories_Products] FOREIGN KEY ([ProductId]) REFERENCES [dbo].[Products]([Id]),
     CONSTRAINT [FK_Inventories_Branches] FOREIGN KEY ([BranchId]) REFERENCES [dbo].[Branches]([Id]),
     CONSTRAINT [CK_Inventories_QuantityReceived] CHECK ([QuantityReceived] > 0),
-    CONSTRAINT [CK_Inventories_RemainingQuantity] CHECK ([RemainingQuantity] >= 0 AND [RemainingQuantity] <= [QuantityReceived])
+    CONSTRAINT [CK_Inventories_RemainingQuantity] CHECK ([RemainingQuantity] >= 0 AND [RemainingQuantity] <= [QuantityReceived]),
+    CONSTRAINT [CK_Inventories_SellingPrice] CHECK ([SellingPrice] IS NULL OR [UnitCost] IS NULL OR [SellingPrice] >= [UnitCost])
 );
 GO
 
@@ -327,12 +329,12 @@ SELECT @P3 = [Id] FROM [dbo].[Products] WHERE [Name] LIKE N'%Dâu Tây%';
 SELECT @P4 = [Id] FROM [dbo].[Products] WHERE [Name] LIKE N'%Cam Ruột Đỏ%';
 SELECT @P5 = [Id] FROM [dbo].[Products] WHERE [Name] LIKE N'%Táo Envy%';
 
-INSERT INTO [dbo].[Inventories] ([ProductId], [BranchId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SupplierName], [Note]) VALUES
-(@P1, @Branch1Id, N'BATCH-NHO-20260801', 50, 50, GETDATE(), DATEADD(day, 25, GETDATE()), 1200000, N'Nagano Fruit Co.', N'Lô nhập hàng không nguyên thùng'),
-(@P2, @Branch1Id, N'BATCH-CHE-20260801', 40, 40, GETDATE(), DATEADD(day, 20, GETDATE()), 600000, N'Tasmania Orchard', N'Hàng tươi nhập mới'),
-(@P3, @Branch1Id, N'BATCH-DAU-20260801', 30, 30, GETDATE(), DATEADD(day, 15, GETDATE()), 400000, N'Seolhyang Farm', N'Dâu tuyết loại 1'),
-(@P4, @Branch1Id, N'BATCH-CAM-20260801', 60, 60, GETDATE(), DATEADD(day, 30, GETDATE()), 220000, N'California Fruit Exporter', N'Cam Cara ngọt thanh'),
-(@P5, @Branch1Id, N'BATCH-TAO-20260801', 50, 50, GETDATE(), DATEADD(day, 45, GETDATE()), 280000, N'Envy NZ Ltd', N'Táo giòn thơm');
+INSERT INTO [dbo].[Inventories] ([ProductId], [BranchId], [BatchCode], [QuantityReceived], [RemainingQuantity], [ReceivedAt], [ExpiryDate], [UnitCost], [SellingPrice], [SupplierName], [Note]) VALUES
+(@P1, @Branch1Id, N'BATCH-NHO-20260801', 50, 50, GETDATE(), DATEADD(day, 25, GETDATE()), 1200000, 1850000, N'Nagano Fruit Co.', N'Lô nhập hàng không nguyên thùng'),
+(@P2, @Branch1Id, N'BATCH-CHE-20260801', 40, 40, GETDATE(), DATEADD(day, 20, GETDATE()), 600000, 920000, N'Tasmania Orchard', N'Hàng tươi nhập mới'),
+(@P3, @Branch1Id, N'BATCH-DAU-20260801', 30, 30, GETDATE(), DATEADD(day, 15, GETDATE()), 400000, 650000, N'Seolhyang Farm', N'Dâu tuyết loại 1'),
+(@P4, @Branch1Id, N'BATCH-CAM-20260801', 60, 60, GETDATE(), DATEADD(day, 30, GETDATE()), 220000, 380000, N'California Fruit Exporter', N'Cam Cara ngọt thanh'),
+(@P5, @Branch1Id, N'BATCH-TAO-20260801', 50, 50, GETDATE(), DATEADD(day, 45, GETDATE()), 280000, 420000, N'Envy NZ Ltd', N'Táo giòn thơm');
 GO
 
 PRINT N'===================================================='

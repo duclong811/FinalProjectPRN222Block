@@ -177,11 +177,8 @@ public sealed class OrderService
                     throw new Exception($"Sản phẩm '{product.Name}' không đủ tồn kho lô khả dụng.");
                 }
 
-                decimal unitPrice = product.Price;
-                if ((batch.ExpiryDate.Date - today).Days <= 2)
-                {
-                    unitPrice = product.Price * 0.5m;
-                }
+                decimal basePrice = batch.SellingPrice ?? product.Price;
+                decimal unitPrice = (batch.ExpiryDate.Date - today).Days <= 2 ? basePrice * 0.5m : basePrice;
 
                 batch.RemainingQuantity -= item.Quantity;
                 product.StockQuantity -= item.Quantity;
