@@ -1,4 +1,4 @@
-﻿<Window x:Class="FruitShop.Client.BranchManagementWindow"
+<Window x:Class="FruitShop.Client.BranchManagementWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Quản Lý Chi Nhánh - FruitShop Manager" Height="600" Width="950"
@@ -12,14 +12,14 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,20">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="Quản Lý Chi Nhánh Cửa Hàng" FontSize="24" FontWeight="Bold" Foreground="#1D2A20"/>
-                <TextBlock Text="Danh sách các cơ sở chi nhánh kinh doanh thuộc hệ thống FruitShop" FontSize="13" Foreground="#59635B" Margin="0,4,0,0"/>
-            </StackPanel>
+        <DockPanel Grid.Row="0" Margin="0,0,0,20" LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Tải lại" Click="RefreshButton_Click" Width="100" Height="36" Background="#E2E8F0" Foreground="#1D2A20" BorderBrush="Transparent" FontWeight="SemiBold" Margin="0,0,10,0"/>
-                <Button Content="+ Thêm Chi Nhánh" Click="AddBranchButton_Click" Width="140" Height="36" Background="#1F4D30" Foreground="White" BorderBrush="Transparent" FontWeight="SemiBold"/>
+                <Button Style="{StaticResource ModernPrimaryButton}" Content="+ Thêm Chi Nhánh" Click="AddBranchButton_Click" Padding="16,0" Margin="0,0,10,0"/>
+                <Button Style="{StaticResource ModernSecondaryButton}" Content="🔄 Tải lại" Click="RefreshButton_Click" Padding="14,0"/>
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Quản Lý Chi Nhánh Cửa Hàng" FontSize="24" FontWeight="Bold" Foreground="#1D2A20"/>
+                <TextBlock Text="Danh sách các cơ sở chi nhánh kinh doanh thuộc hệ thống FruitShop" FontSize="13" Foreground="#59635B" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
             </StackPanel>
         </DockPanel>
 
@@ -33,10 +33,10 @@
 
         <!-- Branches DataGrid -->
         <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" Padding="1">
-            <DataGrid x:Name="BranchesDataGrid" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="40" Background="Transparent" BorderThickness="0">
+            <DataGrid x:Name="BranchesDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="44" AlternatingRowBackground="#F8FAF8" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                    <DataGridTextColumn Header="Tên chi nhánh" Binding="{Binding BranchName}" Width="220"/>
+                    <DataGridTextColumn Header="Tên chi nhánh" Binding="{Binding BranchName}" Width="220" FontWeight="SemiBold"/>
                     <DataGridTextColumn Header="Địa chỉ" Binding="{Binding Address}" Width="300"/>
                     <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Phone}" Width="130"/>
                     <DataGridTextColumn Header="Quản lý phụ trách" Binding="{Binding ManagerName}" Width="150"/>
@@ -46,7 +46,7 @@
 
         <!-- Footer -->
         <DockPanel Grid.Row="3" Margin="0,16,0,0">
-            <Button Content="Đóng" Click="CloseButton_Click" Width="100" Height="36" DockPanel.Dock="Right" Background="#CBD5E0" Foreground="#2D3748" BorderBrush="Transparent" FontWeight="SemiBold"/>
+            <Button Style="{StaticResource ModernSecondaryButton}" Content="Đóng" Click="CloseButton_Click" Width="100" DockPanel.Dock="Right"/>
         </DockPanel>
     </Grid>
 </Window>
