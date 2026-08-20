@@ -116,8 +116,6 @@ public sealed class NotificationService
             var activeBranches = await branchQuery.ToListAsync(cancellationToken);
             if (activeBranches.Count == 0) return;
 
-            var recentCutoff = DateTime.Now.AddHours(-12);
-
             foreach (var branch in activeBranches)
             {
                 int targetManagerId = branch.ManagerId > 0 ? branch.ManagerId : (userId ?? 1);
@@ -133,9 +131,11 @@ public sealed class NotificationService
 
                 foreach (var product in branchProducts)
                 {
+                    var branchInvs = product.Inventories.Where(i => i.BranchId == branch.Id).ToList();
+
                     // Tính tổng số lượng tồn kho khả dụng của sản phẩm tại chi nhánh này
-                    int remainingAtBranch = product.Inventories
-                        .Where(i => i.BranchId == branch.Id && i.RemainingQuantity > 0)
+                    int remainingAtBranch = branchInvs
+                        .Where(i => i.RemainingQuantity > 0)
                         .Sum(i => i.RemainingQuantity);
 
                     // Ngưỡng cảnh báo an toàn: tối thiểu là 10 hoặc theo MinStockThreshold của sản phẩm
@@ -144,22 +144,56 @@ public sealed class NotificationService
                     // Nếu số lượng tồn <= ngưỡng cảnh báo
                     if (remainingAtBranch <= threshold)
                     {
-                        // Kiểm tra xem hiện có thông báo cảnh báo chưa đọc cho sản phẩm này tại chi nhánh chưa
-                        bool exists = await db.Notifications.AnyAsync(n =>
-                            n.BranchId == branch.Id &&
-                            n.Type == "LowStock" &&
-                            !n.IsRead &&
-                            n.Title.Contains(product.Name),
-                            cancellationToken);
+                        // Lấy thông báo cảnh báo gần nhất của sản phẩm này tại chi nhánh
+                        var latestNotification = await db.Notifications
+                            .Where(n => n.BranchId == branch.Id &&
+                                        n.Type == "LowStock" &&
+                                        n.Title.Contains(product.Name))
+                            .OrderByDescending(n => n.CreatedAt)
+                            .FirstOrDefaultAsync(cancellationToken);
 
-                        if (!exists)
+                        // Thời điểm nhập hàng gần nhất của sản phẩm tại chi nhánh này
+                        var latestInventoryDate = branchInvs.Any()
+                            ? (DateTime?)branchInvs.Max(i => i.ReceivedAt > i.CreatedAt ? i.ReceivedAt : i.CreatedAt)
+                            : null;
+
+                        bool shouldCreate = false;
+
+                        if (latestNotification == null)
+                        {
+                            // 1. Chưa từng có thông báo cảnh báo nào -> Cần tạo thông báo mới
+                            shouldCreate = true;
+                        }
+                        else if (!latestNotification.IsRead)
+                        {
+                            // 2. Đang có thông báo CHƯA ĐỌC -> Không tạo thêm thông báo mới để tránh trùng lặp
+                            // Cập nhật lại số lượng tồn mới nhất vào nội dung thông báo nếu có thay đổi
+                            latestNotification.Message = remainingAtBranch == 0
+                                ? $"Sản phẩm '{product.Name}' tại {branch.BranchName} ĐÃ HẾT HÀNG (0 {product.Unit}). Vui lòng nhập thêm hàng gấp!"
+                                : $"Sản phẩm '{product.Name}' tại {branch.BranchName} hiện chỉ còn {remainingAtBranch} {product.Unit} (Ngưỡng an toàn: {threshold}). Vui lòng nhập thêm hàng!";
+                            shouldCreate = false;
+                        }
+                        else
+                        {
+                            // 3. Thông báo gần nhất ĐÃ ĐỌC (Manager đã xác nhận)
+                            // CHỈ TẠO MỚI nếu sau thời điểm tạo thông báo cũ, có đợt NHẬP HÀNG MỚI (latestInventoryDate > latestNotification.CreatedAt)
+                            // và hiện tại số lượng lại bị tụt xuống dưới ngưỡng cảnh báo một lần nữa!
+                            if (latestInventoryDate.HasValue && latestInventoryDate.Value > latestNotification.CreatedAt)
+                            {
+                                shouldCreate = true;
+                            }
+                        }
+
+                        if (shouldCreate)
                         {
                             var notification = new Notification
                             {
                                 UserId = validManagerId,
                                 BranchId = branch.Id,
                                 Title = $"Cảnh báo hết hàng: {product.Name}",
-                                Message = $"Sản phẩm '{product.Name}' tại {branch.BranchName} hiện chỉ còn {remainingAtBranch} {product.Unit} (Ngưỡng an toàn: {threshold}). Vui lòng nhập thêm hàng!",
+                                Message = remainingAtBranch == 0
+                                    ? $"Sản phẩm '{product.Name}' tại {branch.BranchName} ĐÃ HẾT HÀNG (0 {product.Unit}). Vui lòng nhập thêm hàng gấp!"
+                                    : $"Sản phẩm '{product.Name}' tại {branch.BranchName} hiện chỉ còn {remainingAtBranch} {product.Unit} (Ngưỡng an toàn: {threshold}). Vui lòng nhập thêm hàng!",
                                 Type = "LowStock",
                                 IsRead = false,
                                 CreatedAt = DateTime.Now
