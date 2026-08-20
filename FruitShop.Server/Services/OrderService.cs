@@ -228,16 +228,86 @@ public sealed class OrderService
     public async Task<TcpResponse> UpdateOrderStatusAsync(UpdateOrderStatusRequest request, CancellationToken cancellationToken = default)
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
-        var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
+        var order = await db.Orders
+            .Include(o => o.Payments)
+            .Include(o => o.OrderDetails)
+            .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
+
         if (order is null)
             return new TcpResponse { Status = "ERROR", Message = "Không tìm thấy đơn hàng." };
 
-        order.OrderStatus = request.Status;
-        if (request.StaffId.HasValue) order.StaffId = request.StaffId;
+        var newStatus = request.Status.Trim();
+        if (newStatus.Equals("Confirm", StringComparison.OrdinalIgnoreCase))
+        {
+            newStatus = "Confirmed";
+        }
+
+        var oldStatus = order.OrderStatus;
+        order.OrderStatus = newStatus;
+        if (request.StaffId.HasValue && request.StaffId.Value > 0)
+        {
+            order.StaffId = request.StaffId;
+        }
         order.UpdatedAt = DateTime.Now;
 
+        // Auto mark payment as Paid when Completed
+        if (newStatus.Equals("Completed", StringComparison.OrdinalIgnoreCase))
+        {
+            var payment = order.Payments.FirstOrDefault();
+            if (payment is not null)
+            {
+                payment.PaymentStatus = "Paid";
+                payment.PaidAt = DateTime.Now;
+                payment.UpdatedAt = DateTime.Now;
+            }
+            else
+            {
+                db.Payments.Add(new Payment
+                {
+                    OrderId = order.Id,
+                    PaymentMethod = "COD",
+                    PaymentStatus = "Paid",
+                    Amount = order.FinalAmount,
+                    PaidAt = DateTime.Now,
+                    CreatedAt = DateTime.Now
+                });
+            }
+        }
+        // Rollback stock when Cancelled from an active order
+        else if (newStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) && !oldStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (var detail in order.OrderDetails)
+            {
+                var product = await db.Products.FirstOrDefaultAsync(p => p.Id == detail.ProductId, cancellationToken);
+                if (product is not null)
+                {
+                    product.StockQuantity += detail.Quantity;
+                    product.UpdatedAt = DateTime.Now;
+                }
+
+                if (detail.BatchId.HasValue)
+                {
+                    var batch = await db.Inventories.FirstOrDefaultAsync(b => b.Id == detail.BatchId.Value, cancellationToken);
+                    if (batch is not null)
+                    {
+                        batch.RemainingQuantity += detail.Quantity;
+                    }
+                }
+            }
+        }
+
         await db.SaveChangesAsync(cancellationToken);
-        return new TcpResponse { Status = "SUCCESS", Message = "Cập nhật trạng thái đơn hàng thành công." };
+
+        string successMessage = newStatus switch
+        {
+            "Confirmed" => "Xác nhận đơn hàng thành công.",
+            "Shipping" => "Bắt đầu giao hàng thành công.",
+            "Completed" => "Giao hàng thành công.",
+            "Cancelled" => "Hủy đơn hàng thành công.",
+            _ => "Cập nhật trạng thái đơn hàng thành công."
+        };
+
+        return new TcpResponse { Status = "SUCCESS", Message = successMessage };
     }
 
     public async Task<TcpResponse> MarkAsPaidAsync(int orderId, CancellationToken cancellationToken = default)
