@@ -40,34 +40,11 @@ public partial class BranchManagementWindow : Window
 
     private async void AddBranchButton_Click(object sender, RoutedEventArgs e)
     {
-        var branchName = Microsoft.VisualBasic.Interaction.InputBox("Nhập tên chi nhánh mới:", "Tạo Chi Nhánh Mới");
-        if (string.IsNullOrWhiteSpace(branchName)) return;
-
-        var address = Microsoft.VisualBasic.Interaction.InputBox("Nhập địa chỉ chi nhánh:", "Tạo Chi Nhánh Mới");
-        if (string.IsNullOrWhiteSpace(address)) return;
-
-        var phone = Microsoft.VisualBasic.Interaction.InputBox("Nhập số điện thoại:", "Tạo Chi Nhánh Mới");
-        if (!string.IsNullOrWhiteSpace(phone))
+        var dialog = new CreateBranchWindow { Owner = this };
+        if (dialog.ShowDialog() == true)
         {
-            phone = phone.Trim();
-            if (phone.Length != 10 || !phone.StartsWith("0") || !phone.All(char.IsDigit))
-            {
-                MessageBox.Show("Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0.", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            await LoadBranchesAsync();
         }
-
-        var request = new CreateBranchRequest
-        {
-            ManagerId = 2,
-            BranchName = branchName,
-            Address = address,
-            Phone = phone
-        };
-
-        var res = await _clientService.CreateBranchAsync(request);
-        MessageBox.Show(res.Message, "Thông báo", MessageBoxButton.OK, res.Status == "SUCCESS" ? MessageBoxImage.Information : MessageBoxImage.Warning);
-        await LoadBranchesAsync();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();

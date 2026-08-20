@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using FruitShop.Server.Services;
@@ -71,8 +71,9 @@ internal static class Program
             var orderService = new OrderService(settings.ConnectionString);
             var userService = new UserService(settings.ConnectionString);
             var branchService = new BranchService(settings.ConnectionString);
+            var notificationService = new NotificationService(settings.ConnectionString);
 
-            var handler = new RequestHandler(authService, regService, productService, inventoryService, orderService, userService, branchService);
+            var handler = new RequestHandler(authService, regService, productService, inventoryService, orderService, userService, branchService, notificationService);
 
             var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 

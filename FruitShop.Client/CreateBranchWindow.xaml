@@ -1,0 +1,44 @@
+<Window x:Class="FruitShop.Client.CreateBranchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tạo Chi Nhánh Mới" Height="480" Width="500"
+        WindowStartupLocation="CenterOwner" Background="#F5F7F4" ResizeMode="NoResize">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Tạo Chi Nhánh Mới" FontSize="20" FontWeight="Bold" Foreground="#1D2A20"/>
+            <TextBlock Text="Nhập đầy đủ thông tin cơ sở kinh doanh để thêm chi nhánh vào hệ thống" FontSize="12" Foreground="#59635B" Margin="0,3,0,0"/>
+        </StackPanel>
+
+        <!-- Body Form -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="Tên chi nhánh (*)" FontWeight="SemiBold" Foreground="#1D2A20"/>
+                <TextBox x:Name="BranchNameTextBox" Height="34" Margin="0,4,0,12" Padding="8,6" VerticalContentAlignment="Center"/>
+
+                <TextBlock Text="Địa chỉ (*)" FontWeight="SemiBold" Foreground="#1D2A20"/>
+                <TextBox x:Name="AddressTextBox" Height="34" Margin="0,4,0,12" Padding="8,6" VerticalContentAlignment="Center"/>
+
+                <TextBlock Text="Số điện thoại" FontWeight="SemiBold" Foreground="#1D2A20"/>
+                <TextBox x:Name="PhoneTextBox" Height="34" Margin="0,4,0,12" Padding="8,6" VerticalContentAlignment="Center"/>
+
+                <TextBlock Text="Quản lý phụ trách (*)" FontWeight="SemiBold" Foreground="#1D2A20"/>
+                <ComboBox x:Name="ManagerComboBox" Height="34" Margin="0,4,0,12" DisplayMemberPath="DisplayName" SelectedValuePath="Id" VerticalContentAlignment="Center"/>
+
+                <TextBlock x:Name="StatusTextBlock" Text="" Foreground="#B42318" FontWeight="SemiBold" Margin="0,2,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button x:Name="btnCancel" Content="Hủy" Width="90" Height="36" Margin="0,0,10,0" Click="btnCancel_Click" Background="#E2E8F0" Foreground="#2D3748" BorderBrush="Transparent" FontWeight="SemiBold" Cursor="Hand"/>
+            <Button x:Name="btnSave" Content="Tạo chi nhánh" Width="120" Height="36" Click="btnSave_Click" Background="#1F4D30" Foreground="White" BorderBrush="Transparent" FontWeight="SemiBold" Cursor="Hand"/>
+        </StackPanel>
+    </Grid>
+</Window>
