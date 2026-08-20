@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using FruitShop.Shared.Contracts;
+using FruitShop.Shared.Helpers;
 using FruitShop.Web.ViewModels;
 
 namespace FruitShop.Web.Services;
@@ -92,6 +93,45 @@ public sealed class OrderService : IOrderService
         }
 
         return orderCode;
+    }
+
+    public async Task<List<OrderDto>> GetMyOrdersAsync(int userId)
+    {
+        try
+        {
+            var response = await _tcpClient.SendRequestAsync("GET_ORDERS_BY_USER", userId.ToString());
+            if (response.Status == "SUCCESS" && !string.IsNullOrEmpty(response.Data))
+            {
+                var list = JsonSerializer.Deserialize<OrderListResponse>(response.Data, JsonOptions);
+                return list?.Items ?? new List<OrderDto>();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi lấy danh sách đơn hàng của khách hàng {UserId}", userId);
+        }
+
+        return new List<OrderDto>();
+    }
+
+    public async Task<TcpResponse> CancelOrderAsync(int orderId)
+    {
+        try
+        {
+            var request = new UpdateOrderStatusRequest
+            {
+                OrderId = orderId,
+                Status = "Cancelled"
+            };
+
+            var response = await _tcpClient.SendRequestAsync("UPDATE_ORDER_STATUS", JsonSerializer.Serialize(request, JsonOptions));
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi hủy đơn hàng {OrderId}", orderId);
+            return new TcpResponse { Status = "ERROR", Message = $"Lỗi kết nối máy chủ: {ex.Message}" };
+        }
     }
 
     private static string CreateOrderConfirmationEmail(string orderCode, string customerName, CartViewModel cart)
