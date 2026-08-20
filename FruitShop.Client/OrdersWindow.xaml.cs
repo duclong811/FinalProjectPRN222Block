@@ -9,7 +9,9 @@ public partial class OrdersWindow : Window
 {
     private readonly TcpClientService _clientService = new("127.0.0.1", 5055);
     private List<BranchDto> _branches = new();
+    private List<OrderDto> _allOrders = new();
     private int? _currentBranchId;
+    private string _selectedStatusFilter = "ALL";
     private bool _isLoadingBranches = false;
 
     public OrdersWindow(int? branchId = null)
@@ -83,6 +85,43 @@ public partial class OrdersWindow : Window
         }
     }
 
+    private void StatusFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (StatusFilterComboBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+        {
+            _selectedStatusFilter = tag;
+            ApplyOrderFilter();
+        }
+    }
+
+    private void ApplyOrderFilter()
+    {
+        if (_allOrders == null) return;
+
+        var filtered = _allOrders.AsEnumerable();
+
+        if (!string.IsNullOrEmpty(_selectedStatusFilter) && !_selectedStatusFilter.Equals("ALL", StringComparison.OrdinalIgnoreCase))
+        {
+            if (_selectedStatusFilter.Equals("Confirmed", StringComparison.OrdinalIgnoreCase))
+            {
+                filtered = filtered.Where(o => o.OrderStatus.Equals("Confirmed", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Equals("Confirm", StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                filtered = filtered.Where(o => o.OrderStatus.Equals(_selectedStatusFilter, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        var list = filtered.ToList();
+        OrdersDataGrid.ItemsSource = list;
+
+        var branchName = _currentBranchId.HasValue
+            ? _branches.FirstOrDefault(b => b.Id == _currentBranchId.Value)?.BranchName ?? "Chi nhánh"
+            : "Toàn bộ hệ thống";
+
+        StatusTextBlock.Text = $"Hiển thị {list.Count}/{_allOrders.Count} đơn hàng (Chi nhánh: {branchName}).";
+    }
+
     private async Task LoadOrdersAsync()
     {
         try
@@ -90,12 +129,8 @@ public partial class OrdersWindow : Window
             var response = await _clientService.GetOrdersAsync(_currentBranchId);
             if (response.Success)
             {
-                OrdersDataGrid.ItemsSource = response.Items;
-                var branchName = _currentBranchId.HasValue
-                    ? _branches.FirstOrDefault(b => b.Id == _currentBranchId.Value)?.BranchName ?? "Chi nhánh"
-                    : "Toàn bộ hệ thống";
-
-                StatusTextBlock.Text = $"Đã tải {response.Items.Count} đơn hàng (Chi nhánh: {branchName}).";
+                _allOrders = response.Items;
+                ApplyOrderFilter();
             }
             else
             {
@@ -108,41 +143,155 @@ public partial class OrdersWindow : Window
         }
     }
 
-    private async void MarkPaidButton_Click(object sender, RoutedEventArgs e)
+    // 1. Xác nhận đơn: Pending -> Confirmed
+    private async void ConfirmOrder_Click(object sender, RoutedEventArgs e)
     {
-        if (OrdersDataGrid.SelectedItem is OrderDto order)
+        if (sender is Button btn && btn.DataContext is OrderDto order)
         {
-            if (order.PaymentStatus == "Paid")
-            {
-                MessageBox.Show("Đơn hàng này đã được xác nhận thanh toán trước đó.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
+            var confirm = MessageBox.Show(
+                $"Xác nhận đơn hàng '{order.OrderCode}' của khách '{order.CustomerName}'?",
+                "Xác nhận đơn hàng",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
 
-            var confirm = MessageBox.Show($"Xác nhận thanh toán cho đơn hàng '{order.OrderCode}'?", "Xác nhận thanh toán", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (confirm == MessageBoxResult.Yes)
+            if (confirm != MessageBoxResult.Yes) return;
+
+            try
             {
-                try
+                var response = await _clientService.UpdateOrderStatusAsync(new UpdateOrderStatusRequest
                 {
-                    var response = await _clientService.MarkOrderPaidAsync(order.Id);
-                    if (response.Status == "SUCCESS")
-                    {
-                        MessageBox.Show(response.Message, "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-                        await LoadOrdersAsync();
-                    }
-                    else
-                    {
-                        MessageBox.Show(response.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-                catch (Exception ex)
+                    OrderId = order.Id,
+                    Status = "Confirmed"
+                });
+
+                if (response.Status == "SUCCESS")
                 {
-                    MessageBox.Show($"Lỗi xác nhận thanh toán: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Xác nhận đơn hàng thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await LoadOrdersAsync();
                 }
+                else
+                {
+                    MessageBox.Show(response.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật trạng thái: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        else
+    }
+
+    // 2. Bắt đầu giao hàng: Confirmed -> Shipping
+    private async void ShipOrder_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.DataContext is OrderDto order)
         {
-            MessageBox.Show("Vui lòng chọn một đơn hàng từ danh sách.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            var confirm = MessageBox.Show(
+                $"Bắt đầu giao hàng cho đơn '{order.OrderCode}' đến địa chỉ:\n{order.ShippingAddress}?",
+                "Bắt đầu giao hàng",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            try
+            {
+                var response = await _clientService.UpdateOrderStatusAsync(new UpdateOrderStatusRequest
+                {
+                    OrderId = order.Id,
+                    Status = "Shipping"
+                });
+
+                if (response.Status == "SUCCESS")
+                {
+                    MessageBox.Show("Bắt đầu giao hàng thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await LoadOrdersAsync();
+                }
+                else
+                {
+                    MessageBox.Show(response.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật trạng thái: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    // 3. Đã giao hàng thành công: Shipping -> Completed
+    private async void CompleteOrder_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.DataContext is OrderDto order)
+        {
+            var confirm = MessageBox.Show(
+                $"Xác nhận đơn hàng '{order.OrderCode}' đã được giao thành công cho khách hàng '{order.CustomerName}' và thu đủ {order.TotalAmount:N0} đ?",
+                "Xác nhận giao hàng thành công",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            try
+            {
+                var response = await _clientService.UpdateOrderStatusAsync(new UpdateOrderStatusRequest
+                {
+                    OrderId = order.Id,
+                    Status = "Completed"
+                });
+
+                if (response.Status == "SUCCESS")
+                {
+                    MessageBox.Show("Giao hàng thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await LoadOrdersAsync();
+                }
+                else
+                {
+                    MessageBox.Show(response.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật trạng thái: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    // 4. Hủy đơn hàng -> Cancelled
+    private async void CancelOrder_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.DataContext is OrderDto order)
+        {
+            var confirm = MessageBox.Show(
+                $"Bạn có chắc chắn muốn hủy đơn hàng '{order.OrderCode}' không?",
+                "Xác nhận hủy đơn",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            try
+            {
+                var response = await _clientService.UpdateOrderStatusAsync(new UpdateOrderStatusRequest
+                {
+                    OrderId = order.Id,
+                    Status = "Cancelled"
+                });
+
+                if (response.Status == "SUCCESS")
+                {
+                    MessageBox.Show("Hủy đơn hàng thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await LoadOrdersAsync();
+                }
+                else
+                {
+                    MessageBox.Show(response.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi hủy đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 
