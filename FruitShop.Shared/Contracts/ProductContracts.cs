@@ -25,6 +25,8 @@ public class CreateProductRequest
     public int? BranchId { get; set; }
     public int InitialStock { get; set; } = 50;
     public DateTime? ExpiryDate { get; set; }
+    public decimal? UnitCost { get; set; }
+    public decimal? SellingPrice { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal Price { get; set; }

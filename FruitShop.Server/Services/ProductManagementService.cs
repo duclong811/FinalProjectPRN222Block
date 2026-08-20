@@ -38,10 +38,17 @@ public sealed class ProductManagementService
     public async Task<ProductListResponse> GetActiveProductsAsync(int? branchId = null, CancellationToken cancellationToken = default)
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
-        var items = await db.Products.AsNoTracking()
+        var query = db.Products.AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Inventories)
-            .Where(p => p.IsActive)
+            .Where(p => p.IsActive);
+
+        if (branchId.HasValue && branchId.Value > 0)
+        {
+            query = query.Where(p => p.Inventories.Any(i => i.BranchId == branchId.Value));
+        }
+
+        var items = await query
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new ProductDto
             {
@@ -129,7 +136,7 @@ public sealed class ProductManagementService
                     RemainingQuantity = inv.RemainingQuantity,
                     ExpiryDate = inv.ExpiryDate,
                     HasExpiryDiscount = (inv.ExpiryDate.Date - today).Days <= 2,
-                    SalePrice = (inv.ExpiryDate.Date - today).Days <= 2 ? p.Price * 0.5m : p.Price
+                    SalePrice = (inv.ExpiryDate.Date - today).Days <= 2 ? (inv.SellingPrice ?? p.Price) * 0.5m : (inv.SellingPrice ?? p.Price)
                 })
                 .ToList();
 
@@ -194,7 +201,7 @@ public sealed class ProductManagementService
                 RemainingQuantity = inv.RemainingQuantity,
                 ExpiryDate = inv.ExpiryDate,
                 HasExpiryDiscount = (inv.ExpiryDate.Date - today).Days <= 2,
-                SalePrice = (inv.ExpiryDate.Date - today).Days <= 2 ? p.Price * 0.5m : p.Price
+                SalePrice = (inv.ExpiryDate.Date - today).Days <= 2 ? (inv.SellingPrice ?? p.Price) * 0.5m : (inv.SellingPrice ?? p.Price)
             })
             .ToList();
 
@@ -254,10 +261,17 @@ public sealed class ProductManagementService
     {
         await using var db = FruitStoreDbContextFactory.Create(_connectionString);
         keyword = keyword?.Trim() ?? string.Empty;
-        var items = await db.Products.AsNoTracking()
+        var query = db.Products.AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Inventories)
-            .Where(p => p.IsActive && p.Name.Contains(keyword))
+            .Where(p => p.IsActive && p.Name.Contains(keyword));
+
+        if (branchId.HasValue && branchId.Value > 0)
+        {
+            query = query.Where(p => p.Inventories.Any(i => i.BranchId == branchId.Value));
+        }
+
+        var items = await query
             .Select(p => new ProductDto
             {
                 Id = p.Id,
@@ -327,6 +341,7 @@ public sealed class ProductManagementService
             if (request.BranchId.HasValue && request.BranchId.Value > 0)
             {
                 var stockQty = initialStock > 0 ? initialStock : 50;
+                var sellingPrice = request.SellingPrice ?? (request.Price > 0 ? request.Price : 0);
                 var batch = new Inventory
                 {
                     ProductId = product.Id,
@@ -336,6 +351,8 @@ public sealed class ProductManagementService
                     RemainingQuantity = stockQty,
                     ReceivedAt = DateTime.Now,
                     ExpiryDate = request.ExpiryDate ?? DateTime.Today.AddDays(30),
+                    UnitCost = request.UnitCost,
+                    SellingPrice = sellingPrice,
                     CreatedAt = DateTime.Now
                 };
                 db.Inventories.Add(batch);

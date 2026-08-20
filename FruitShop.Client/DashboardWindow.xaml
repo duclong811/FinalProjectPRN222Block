@@ -198,9 +198,9 @@
                             <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="70" />
                             <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="2*" MinWidth="180" />
                             <DataGridTextColumn Header="Danh mục" Binding="{Binding CategoryName}" Width="*" MinWidth="120" />
-                            <DataGridTextColumn Header="Giá bán (đ)" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="*" MinWidth="110" />
                             <DataGridTextColumn Header="Tồn kho chi nhánh" Binding="{Binding StockQuantity}" Width="140" FontWeight="SemiBold" />
                             <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="90" />
+                            <DataGridTextColumn Header="Mô tả" Binding="{Binding Description}" Width="2*" MinWidth="180" />
                         </DataGrid.Columns>
                     </DataGrid>
 

@@ -37,7 +37,8 @@ public sealed class InventoryService
                 ProductName = i.Product.Name,
                 CategoryName = i.Product.Category != null ? i.Product.Category.Name : string.Empty,
                 Unit = i.Product.Unit,
-                Price = i.Product.Price,
+                Price = i.SellingPrice ?? i.Product.Price,
+                SellingPrice = i.SellingPrice ?? i.Product.Price,
                 BranchId = i.BranchId,
                 BranchName = i.Branch.BranchName,
                 BatchCode = i.BatchCode,
@@ -73,6 +74,15 @@ public sealed class InventoryService
             request.BranchId = defaultBranch.Id;
         }
 
+        var sellingPrice = request.SellingPrice.HasValue && request.SellingPrice.Value > 0
+            ? request.SellingPrice.Value
+            : product.Price;
+
+        if (request.UnitCost.HasValue && request.UnitCost.Value > 0 && sellingPrice < request.UnitCost.Value)
+        {
+            return new TcpResponse { Status = "ERROR", Message = "Giá bán ra không được thấp hơn giá nhập (vốn)." };
+        }
+
         var inventory = new Inventory
         {
             ProductId = request.ProductId,
@@ -83,6 +93,7 @@ public sealed class InventoryService
             ReceivedAt = DateTime.Now,
             ExpiryDate = request.ExpiryDate,
             UnitCost = request.UnitCost,
+            SellingPrice = sellingPrice,
             SupplierName = string.IsNullOrWhiteSpace(request.SupplierName) ? null : request.SupplierName.Trim(),
             Note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim(),
             CreatedAt = DateTime.Now
