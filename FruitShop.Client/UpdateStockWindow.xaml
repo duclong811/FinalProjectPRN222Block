@@ -1,4 +1,4 @@
-﻿<Window x:Class="FruitShop.Client.UpdateStockWindow"
+<Window x:Class="FruitShop.Client.UpdateStockWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Nhập Kho Lô Hàng Tồn" Height="620" Width="520" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Background="#F5F7F4">
