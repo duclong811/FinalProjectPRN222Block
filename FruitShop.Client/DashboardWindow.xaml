@@ -62,6 +62,10 @@
                     <Button Content="Tạo sản phẩm" Click="AddProductButton_Click" Height="38" Width="116" Margin="0,0,10,0" Background="#275D38" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" />
                     <Button Content="Tải lại" Click="RefreshButton_Click" Height="38" Width="90" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" />
                 </StackPanel>
+                <StackPanel x:Name="UserActionPanel" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed">
+                    <Button Content="+ Tạo Tài Khoản" Click="AddUserButton_Click" Height="38" Width="140" Background="#1F4D30" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Cursor="Hand" Margin="0,0,10,0"/>
+                    <Button Content="Tải lại" Click="RefreshUsersButton_Click" Height="38" Width="90" Background="#FFFFFF" Foreground="#275D38" BorderBrush="#275D38" FontWeight="SemiBold" Cursor="Hand" />
+                </StackPanel>
             </DockPanel>
             <Border Grid.Row="1" Margin="0,20,0,14" Padding="14,10" Background="#E8F2EA" CornerRadius="8">
                 <DockPanel>
@@ -70,16 +74,39 @@
                 </DockPanel>
             </Border>
             <Border Grid.Row="2" Background="White" CornerRadius="10" BorderBrush="#E0E6E1" BorderThickness="1" Padding="10">
-                <DataGrid x:Name="ProductsDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" SelectionChanged="ProductsDataGrid_SelectionChanged">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="70" />
-                        <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="2*" />
-                        <DataGridTextColumn Header="Danh mục" Binding="{Binding CategoryName}" Width="*" />
-                        <DataGridTextColumn Header="Giá bán (đ)" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="*" />
-                        <DataGridTextColumn Header="Tồn kho chi nhánh" Binding="{Binding StockQuantity}" Width="140" FontWeight="SemiBold" />
-                        <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="90" />
-                    </DataGrid.Columns>
-                </DataGrid>
+                <Grid>
+                    <DataGrid x:Name="ProductsDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0" RowHeight="44" AlternatingRowBackground="#F8FAF8" SelectionChanged="ProductsDataGrid_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="70" />
+                            <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="2*" MinWidth="180" />
+                            <DataGridTextColumn Header="Danh mục" Binding="{Binding CategoryName}" Width="*" MinWidth="120" />
+                            <DataGridTextColumn Header="Giá bán (đ)" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="*" MinWidth="110" />
+                            <DataGridTextColumn Header="Tồn kho chi nhánh" Binding="{Binding StockQuantity}" Width="140" FontWeight="SemiBold" />
+                            <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="90" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <DataGrid x:Name="UsersDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeight="44" AlternatingRowBackground="#F8FAF8" Background="Transparent" BorderThickness="0" Visibility="Collapsed" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="Tên đăng nhập" Binding="{Binding Username}" Width="130"/>
+                            <DataGridTextColumn Header="Họ và tên" Binding="{Binding FullName}" Width="170"/>
+                            <DataGridTextColumn Header="Vai trò (Role)" Binding="{Binding RoleName}" Width="110"/>
+                            <DataGridTextColumn Header="Chi nhánh" Binding="{Binding BranchName}" Width="180"/>
+                            <DataGridTextColumn Header="Email / SĐT" Binding="{Binding Email}" Width="160"/>
+                            <DataGridTextColumn Header="Trạng thái" Binding="{Binding IsActive}" Width="90"/>
+                            <DataGridTemplateColumn Header="Thao tác" Width="180" MinWidth="180">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button Content="Khóa/Mở" Click="ToggleActive_Click" Margin="3,0" Padding="8,4" Background="#EDF2F7" Foreground="#2D3748" BorderBrush="#CBD5E0" BorderThickness="1" FontSize="12" Cursor="Hand"/>
+                                            <Button Content="Reset MK" Click="ResetPassword_Click" Margin="3,0" Padding="8,4" Background="#FEFCBF" Foreground="#744210" BorderBrush="#ECC94B" BorderThickness="1" FontSize="12" Cursor="Hand"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </Border>
         </Grid>
     </Grid>
