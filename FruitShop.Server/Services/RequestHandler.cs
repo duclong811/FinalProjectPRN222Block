@@ -14,6 +14,7 @@ public sealed class RequestHandler
     private readonly OrderService _orderService;
     private readonly UserService _userService;
     private readonly BranchService _branchService;
+    private readonly NotificationService _notificationService;
 
     public RequestHandler(
         UserAuthenticationService authService,
@@ -22,7 +23,8 @@ public sealed class RequestHandler
         InventoryService inventoryService,
         OrderService orderService,
         UserService userService,
-        BranchService branchService)
+        BranchService branchService,
+        NotificationService notificationService)
     {
         _authService = authService;
         _regService = regService;
@@ -31,6 +33,7 @@ public sealed class RequestHandler
         _orderService = orderService;
         _userService = userService;
         _branchService = branchService;
+        _notificationService = notificationService;
     }
 
     public async Task<TcpResponse> HandleRequestAsync(TcpRequest request, CancellationToken cancellationToken = default)
@@ -120,6 +123,48 @@ public sealed class RequestHandler
                         var req = JsonSerializer.Deserialize<UpdateBranchRequest>(request.Data, JsonOptions);
                         if (req is null) throw new Exception("Dữ liệu cập nhật chi nhánh không hợp lệ.");
                         return await _branchService.UpdateBranchAsync(req, cancellationToken);
+                    }
+
+                // Notification Actions (Manager / Staff / Admin)
+                case "GET_NOTIFICATIONS":
+                case "NOTIFICATIONS":
+                    {
+                        var req = new GetNotificationsRequest();
+                        if (!string.IsNullOrWhiteSpace(request.Data))
+                        {
+                            if (int.TryParse(request.Data, out var bId))
+                            {
+                                req.BranchId = bId > 0 ? bId : null;
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    req = JsonSerializer.Deserialize<GetNotificationsRequest>(request.Data, JsonOptions) ?? new GetNotificationsRequest();
+                                }
+                                catch { }
+                            }
+                        }
+                        var res = await _notificationService.GetNotificationsAsync(req, cancellationToken);
+                        response.Status = "SUCCESS";
+                        response.Data = JsonSerializer.Serialize(res, JsonOptions);
+                    }
+                    break;
+
+                case "MARK_NOTIFICATION_READ":
+                    {
+                        int id = int.TryParse(request.Data, out var nId) ? nId : 0;
+                        return await _notificationService.MarkReadAsync(id, cancellationToken);
+                    }
+
+                case "MARK_ALL_NOTIFICATIONS_READ":
+                    {
+                        int? branchId = null;
+                        if (!string.IsNullOrWhiteSpace(request.Data) && int.TryParse(request.Data, out var bId) && bId > 0)
+                        {
+                            branchId = bId;
+                        }
+                        return await _notificationService.MarkAllReadAsync(branchId, null, cancellationToken);
                     }
 
                 // Product Actions

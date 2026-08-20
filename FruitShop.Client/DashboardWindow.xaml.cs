@@ -32,6 +32,7 @@ public partial class DashboardWindow : Window
         {
             await LoadBranchesAsync();
             await LoadProductsAsync();
+            await LoadNotificationCountAsync();
         };
     }
 
@@ -147,6 +148,28 @@ public partial class DashboardWindow : Window
             }
 
             await LoadProductsAsync();
+            await LoadNotificationCountAsync();
+        }
+    }
+
+    private async Task LoadNotificationCountAsync()
+    {
+        try
+        {
+            var response = await _clientService.GetNotificationsAsync(_currentSelectedBranchId);
+            if (response.Success && response.UnreadCount > 0)
+            {
+                NotificationBadgeBorder.Visibility = Visibility.Visible;
+                NotificationBadgeTextBlock.Text = response.UnreadCount > 99 ? "99+" : response.UnreadCount.ToString();
+            }
+            else
+            {
+                NotificationBadgeBorder.Visibility = Visibility.Collapsed;
+            }
+        }
+        catch
+        {
+            NotificationBadgeBorder.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -176,7 +199,23 @@ public partial class DashboardWindow : Window
         }
     }
 
-    private async void RefreshButton_Click(object sender, RoutedEventArgs e) => await LoadProductsAsync();
+    private async void RefreshButton_Click(object sender, RoutedEventArgs e)
+    {
+        await LoadProductsAsync();
+        await LoadNotificationCountAsync();
+    }
+
+    private async void NotificationBellButton_Click(object sender, RoutedEventArgs e)
+    {
+        var branchName = _currentSelectedBranchId.HasValue
+            ? _branches.FirstOrDefault(b => b.Id == _currentSelectedBranchId.Value)?.BranchName
+            : "Toàn bộ hệ thống";
+
+        var notifWindow = new NotificationsWindow(_currentSelectedBranchId, branchName) { Owner = this };
+        notifWindow.ShowDialog();
+        await LoadNotificationCountAsync();
+        await LoadProductsAsync();
+    }
 
     private async void AddProductButton_Click(object sender, RoutedEventArgs e)
     {

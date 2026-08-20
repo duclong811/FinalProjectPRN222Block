@@ -124,6 +124,21 @@ public sealed class TcpClientService
     public async Task<TcpResponse> CreateBranchAsync(CreateBranchRequest request) => await SendRequestAsync("CREATE_BRANCH", request);
     public async Task<TcpResponse> UpdateBranchAsync(UpdateBranchRequest request) => await SendRequestAsync("UPDATE_BRANCH", request);
 
+    // Notifications (Manager / Staff / Admin)
+    public async Task<NotificationListResponse> GetNotificationsAsync(int? branchId = null, int? userId = null)
+    {
+        var request = new GetNotificationsRequest { BranchId = branchId, UserId = userId };
+        var response = await SendRequestAsync("GET_NOTIFICATIONS", request);
+        if (response.Status != "SUCCESS" || string.IsNullOrEmpty(response.Data))
+            return new NotificationListResponse { Success = false, Message = response.Message };
+
+        return JsonSerializer.Deserialize<NotificationListResponse>(response.Data, JsonOptions)
+            ?? new NotificationListResponse { Success = false, Message = "Lỗi giải mã danh sách thông báo." };
+    }
+
+    public async Task<TcpResponse> MarkNotificationReadAsync(int notificationId) => await SendRequestAsync("MARK_NOTIFICATION_READ", notificationId.ToString());
+    public async Task<TcpResponse> MarkAllNotificationsReadAsync(int? branchId = null) => await SendRequestAsync("MARK_ALL_NOTIFICATIONS_READ", branchId?.ToString() ?? string.Empty);
+
     private async Task<TcpResponse> SendRequestAsync<T>(string action, T payload)
     {
         var dataJson = JsonSerializer.Serialize(payload, JsonOptions);
