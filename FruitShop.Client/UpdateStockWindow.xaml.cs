@@ -60,6 +60,14 @@ public partial class UpdateStockWindow : Window
         }
     }
 
+    private void ProductComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (ProductComboBox.SelectedItem is ProductDto product)
+        {
+            SellingPriceTextBox.Text = product.Price.ToString("0.##");
+        }
+    }
+
     private async void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         if (ProductComboBox.SelectedValue is not int productId || productId <= 0)
@@ -83,6 +91,34 @@ public partial class UpdateStockWindow : Window
             return;
         }
 
+        decimal? unitCost = null;
+        if (!string.IsNullOrWhiteSpace(UnitCostTextBox.Text))
+        {
+            if (!decimal.TryParse(UnitCostTextBox.Text.Trim(), out var parsedCost) || parsedCost < 0)
+            {
+                StatusTextBlock.Text = "Giá nhập (vốn) không hợp lệ.";
+                return;
+            }
+            unitCost = parsedCost;
+        }
+
+        decimal? sellingPrice = null;
+        if (!string.IsNullOrWhiteSpace(SellingPriceTextBox.Text))
+        {
+            if (!decimal.TryParse(SellingPriceTextBox.Text.Trim(), out var parsedPrice) || parsedPrice <= 0)
+            {
+                StatusTextBlock.Text = "Giá bán ra phải là số dương hợp lệ.";
+                return;
+            }
+            sellingPrice = parsedPrice;
+        }
+
+        if (unitCost.HasValue && sellingPrice.HasValue && sellingPrice.Value < unitCost.Value)
+        {
+            StatusTextBlock.Text = "Giá bán ra không được thấp hơn giá nhập (vốn). Vui lòng kiểm tra lại.";
+            return;
+        }
+
         if (ExpiryDatePicker.SelectedDate is not DateTime expiryDate)
         {
             StatusTextBlock.Text = "Vui lòng chọn hạn sử dụng.";
@@ -95,7 +131,10 @@ public partial class UpdateStockWindow : Window
             BranchId = branchId,
             BatchCode = batchCode,
             Quantity = quantity,
-            ExpiryDate = expiryDate
+            ExpiryDate = expiryDate,
+            UnitCost = unitCost,
+            SellingPrice = sellingPrice,
+            SupplierName = string.IsNullOrWhiteSpace(SupplierNameTextBox.Text) ? null : SupplierNameTextBox.Text.Trim()
         };
 
         SaveButton.IsEnabled = false;

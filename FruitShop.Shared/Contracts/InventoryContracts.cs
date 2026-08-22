@@ -8,6 +8,7 @@ public class InventoryDto
     public string CategoryName { get; set; } = string.Empty;
     public string Unit { get; set; } = string.Empty;
     public decimal Price { get; set; }
+    public decimal? SellingPrice { get; set; }
     public int BranchId { get; set; }
     public string BranchName { get; set; } = string.Empty;
     public string BatchCode { get; set; } = string.Empty;
@@ -31,6 +32,7 @@ public class ReceiveInventoryRequest
     public int Quantity { get; set; }
     public DateTime ExpiryDate { get; set; }
     public decimal? UnitCost { get; set; }
+    public decimal? SellingPrice { get; set; }
     public string? SupplierName { get; set; }
     public string? Note { get; set; }
 }
