@@ -139,6 +139,17 @@ public sealed class TcpClientService
     public async Task<TcpResponse> MarkNotificationReadAsync(int notificationId) => await SendRequestAsync("MARK_NOTIFICATION_READ", notificationId.ToString());
     public async Task<TcpResponse> MarkAllNotificationsReadAsync(int? branchId = null) => await SendRequestAsync("MARK_ALL_NOTIFICATIONS_READ", branchId?.ToString() ?? string.Empty);
 
+    // Revenue & Analytics (Manager)
+    public async Task<RevenueReportResponse> GetRevenueReportAsync(GetRevenueReportRequest request)
+    {
+        var response = await SendRequestAsync("GET_REVENUE_REPORT", request);
+        if (response.Status != "SUCCESS" || string.IsNullOrEmpty(response.Data))
+            return new RevenueReportResponse { Success = false, Message = response.Message };
+
+        return JsonSerializer.Deserialize<RevenueReportResponse>(response.Data, JsonOptions)
+            ?? new RevenueReportResponse { Success = false, Message = "Lỗi giải mã báo cáo doanh thu." };
+    }
+
     private async Task<TcpResponse> SendRequestAsync<T>(string action, T payload)
     {
         var dataJson = JsonSerializer.Serialize(payload, JsonOptions);

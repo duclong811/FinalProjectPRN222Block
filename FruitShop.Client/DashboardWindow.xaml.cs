@@ -63,6 +63,7 @@ public partial class DashboardWindow : Window
             InventoryNavigationButton.Visibility = Visibility.Collapsed;
             ExpiryNavigationButton.Visibility = Visibility.Collapsed;
             OrdersNavigationButton.Visibility = Visibility.Collapsed;
+            RevenueReportNavigationButton.Visibility = Visibility.Collapsed;
 
             ProductActionPanel.Visibility = Visibility.Collapsed;
             UserActionPanel.Visibility = Visibility.Visible;
@@ -88,6 +89,7 @@ public partial class DashboardWindow : Window
             InventoryNavigationButton.Visibility = Visibility.Visible;
             OrdersNavigationButton.Visibility = Visibility.Visible;
             ExpiryNavigationButton.Visibility = Visibility.Visible;
+            RevenueReportNavigationButton.Visibility = Visibility.Visible;
 
             ProductActionPanel.Visibility = Visibility.Visible;
             UserActionPanel.Visibility = Visibility.Collapsed;
@@ -108,6 +110,7 @@ public partial class DashboardWindow : Window
             InventoryNavigationButton.Visibility = Visibility.Collapsed;
             ExpiryNavigationButton.Visibility = Visibility.Collapsed;
             OrdersNavigationButton.Visibility = Visibility.Visible;
+            RevenueReportNavigationButton.Visibility = Visibility.Collapsed;
 
             ProductActionPanel.Visibility = Visibility.Collapsed;
             UserActionPanel.Visibility = Visibility.Collapsed;
@@ -570,6 +573,7 @@ public partial class DashboardWindow : Window
         }
     }
     private void ExpiryNavigationButton_Click(object sender, RoutedEventArgs e) => new ExpiryManagementWindow(_currentSelectedBranchId) { Owner = this }.ShowDialog();
+    private void RevenueReportNavigationButton_Click(object sender, RoutedEventArgs e) => new RevenueReportWindow(_currentSelectedBranchId ?? _branchId) { Owner = this }.ShowDialog();
     private void SignOutButton_Click(object sender, RoutedEventArgs e)
     {
         new MainWindow().Show();
