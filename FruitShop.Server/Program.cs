@@ -72,8 +72,9 @@ internal static class Program
             var userService = new UserService(settings.ConnectionString);
             var branchService = new BranchService(settings.ConnectionString);
             var notificationService = new NotificationService(settings.ConnectionString);
+            var reportService = new ReportService(settings.ConnectionString);
 
-            var handler = new RequestHandler(authService, regService, productService, inventoryService, orderService, userService, branchService, notificationService);
+            var handler = new RequestHandler(authService, regService, productService, inventoryService, orderService, userService, branchService, notificationService, reportService);
 
             var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 

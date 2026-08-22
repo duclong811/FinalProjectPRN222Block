@@ -15,6 +15,7 @@ public sealed class RequestHandler
     private readonly UserService _userService;
     private readonly BranchService _branchService;
     private readonly NotificationService _notificationService;
+    private readonly ReportService _reportService;
 
     public RequestHandler(
         UserAuthenticationService authService,
@@ -24,7 +25,8 @@ public sealed class RequestHandler
         OrderService orderService,
         UserService userService,
         BranchService branchService,
-        NotificationService notificationService)
+        NotificationService notificationService,
+        ReportService reportService)
     {
         _authService = authService;
         _regService = regService;
@@ -34,6 +36,7 @@ public sealed class RequestHandler
         _userService = userService;
         _branchService = branchService;
         _notificationService = notificationService;
+        _reportService = reportService;
     }
 
     public async Task<TcpResponse> HandleRequestAsync(TcpRequest request, CancellationToken cancellationToken = default)
@@ -368,6 +371,31 @@ public sealed class RequestHandler
                         int id = int.TryParse(request.Data, out var oId) ? oId : 0;
                         return await _orderService.MarkAsPaidAsync(oId, cancellationToken);
                     }
+
+                case "GET_REVENUE_REPORT":
+                case "REVENUE_REPORT":
+                    {
+                        var req = new GetRevenueReportRequest();
+                        if (!string.IsNullOrWhiteSpace(request.Data))
+                        {
+                            try
+                            {
+                                req = JsonSerializer.Deserialize<GetRevenueReportRequest>(request.Data, JsonOptions) ?? new GetRevenueReportRequest();
+                            }
+                            catch
+                            {
+                                if (int.TryParse(request.Data, out var bId))
+                                {
+                                    req.BranchId = bId > 0 ? bId : null;
+                                }
+                            }
+                        }
+                        var res = await _reportService.GetRevenueReportAsync(req, cancellationToken);
+                        response.Status = res.Success ? "SUCCESS" : "ERROR";
+                        response.Message = res.Message;
+                        response.Data = JsonSerializer.Serialize(res, JsonOptions);
+                    }
+                    break;
 
                 default:
                     response.Status = "ERROR";

@@ -108,6 +108,7 @@
                     <Button x:Name="InventoryNavigationButton" Content="Quản lý kho" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,8,0,0" Click="InventoryNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" />
                     <Button x:Name="OrdersNavigationButton" Content="Quản lý đơn hàng" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,8,0,0" Click="OrdersNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" />
                     <Button x:Name="ExpiryNavigationButton" Content="Hàng sắp hết hạn" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,8,0,0" Click="ExpiryNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" />
+                    <Button x:Name="RevenueReportNavigationButton" Content="Báo cáo doanh thu" Height="44" HorizontalContentAlignment="Left" Padding="14,0" Margin="0,8,0,0" Click="RevenueReportNavigationButton_Click" Background="Transparent" Foreground="#E6F2E8" BorderBrush="Transparent" FontSize="14" Cursor="Hand" Visibility="Collapsed" />
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <Separator Margin="0,16,0,16" Background="#FFFFFF33" />
